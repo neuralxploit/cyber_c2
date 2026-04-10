@@ -37,6 +37,7 @@ kombu==5.6.1
 lxml==6.0.2
 lxml_html_clean==0.4.3
 msgpack==1.1.2
+openai>=1.0.0
 packaging==25.0
 primp==0.15.0
 prompt_toolkit==3.0.52
@@ -48,6 +49,7 @@ PyJWT==2.10.1
 pymetasploit3==1.0.6
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.0
+python-multipart>=0.0.6
 pytz==2025.2
 redis==7.1.0
 regex==2025.11.3
