@@ -62,11 +62,13 @@ All agents support:
 - Multi-operator support
 
 ### OPSEC Stack
-- Layered anonymization: VPN + Tor + Cloudflare Tunnel
-- Automatic VPN/Tor detection and circuit verification
+- **Dual Cloudflare Tunnels** - Separate tunnel for C2 (`localhost:8000`) and MSF (`localhost:8443`), each gets its own `.trycloudflare.com` URL
+- **Tor routing** - Tunnels can be routed through Tor SOCKS5 proxy for additional anonymity
+- **Layered anonymization** - VPN + Tor + Cloudflare (auto-detected at startup)
+- **Resume mode** (`--resume` / `-r`) - Keeps same tunnel URLs after crashes, so payloads already deployed keep working
 - Token-protected payload delivery endpoints
 - mTLS mutual authentication (optional)
-- Replay attack prevention (5-minute timestamp window)
+- Replay attack prevention (5-minute HMAC timestamp window)
 
 ---
 
@@ -111,13 +113,18 @@ chmod +x start_c5.sh
 ```
 
 `start_c5.sh` handles the full startup sequence:
-1. Validates OPSEC layers (VPN, Tor)
+1. Validates OPSEC layers (VPN, Tor detection)
 2. Generates fresh auth tokens (`PAYLOAD_TOKEN`, `AGENT_API_KEY`)
-3. Cross-compiles Rust agents for Windows
-4. Starts Cloudflare tunnels
-5. Injects C2 URLs and tokens into all payloads
-6. Launches the C2 server
-7. Prints ready-to-use payload one-liners
+3. Cross-compiles Rust agents for Windows (x86_64-pc-windows-gnu)
+4. Starts **dual Cloudflare tunnels** (C2 on `:8000`, MSF on `:8443`), optionally routed through Tor
+5. Injects tunnel URLs and tokens into all payload source files
+6. Launches the C2 server (FastAPI + Redis)
+7. Prints ready-to-use payload one-liners with the live tunnel URLs
+
+```bash
+# Resume mode - reuse existing tunnel URLs (e.g. after a crash)
+./start_c5.sh --resume
+```
 
 ---
 
