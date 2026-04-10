@@ -108,12 +108,20 @@ The `i5_syscall.ps1` scripts provide **ntdll-level syscall injection** for loadi
 ## Quick Start
 
 ### Prerequisites
-- Linux (Ubuntu/Debian recommended)
-- Python 3.10+
-- Redis
-- Ollama (for AI assistant)
-- Rust toolchain + MinGW-w64 (for agent compilation)
-- Metasploit Framework (optional)
+
+All installed automatically by `setup_ubuntu.sh`:
+
+| Dependency | Purpose |
+|-----------|---------|
+| Python 3.10+ | C2 server (FastAPI) |
+| Redis | Session state & job tracking |
+| Metasploit Framework | MSF console, meterpreter sessions, payload generation (msfvenom) |
+| Rust + MinGW-w64 | Cross-compile Rust agents for Windows (x86_64-pc-windows-gnu) |
+| Nim | Compile lightweight Nim agents (~120KB, AV-evasive) |
+| .NET 8 SDK | Compile C# agent (optional, install manually if needed) |
+| Cloudflared | Dual Cloudflare tunnels (C2 + MSF) |
+| Tor + torsocks | Anonymous tunnel routing (optional, `--tor` flag) |
+| Ollama | Local AI assistant (install any model you want) |
 
 ### Install
 
@@ -122,17 +130,25 @@ The `i5_syscall.ps1` scripts provide **ntdll-level syscall injection** for loadi
 git clone https://github.com/neuralxploit/cyber_c2.git
 cd cyber_c2
 
-# Run setup (installs dependencies, Rust toolchain, etc.)
+# Run setup (installs everything: MSF, Rust, Nim, Redis, Tor, Cloudflared, Python deps)
 chmod +x setup_ubuntu.sh
 ./setup_ubuntu.sh
 
-# Install Python deps
-pip install -r requirements.txt
-
-# Install an Ollama model for the AI assistant
-ollama pull llama3.1
-# Or any model you prefer: mistral, qwen2.5, codellama, etc.
+# Install Ollama + a model for the AI assistant
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.1   # or: mistral, qwen2.5, codellama, etc.
 ```
+
+`setup_ubuntu.sh` installs in order:
+1. System packages (build tools, OpenSSL, netcat)
+2. Redis
+3. Cloudflared (Cloudflare tunnel)
+4. **Metasploit Framework** (msfconsole, msfvenom, meterpreter)
+5. **Rust** + MinGW-w64 cross-compiler (Windows agent compilation)
+6. **Nim** (lightweight agent compilation)
+7. Python venv + all pip dependencies
+8. Tor with control port
+9. Directories, SSL certs
 
 ### Launch
 
