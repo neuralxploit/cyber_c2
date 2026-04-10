@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2A C2 Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/c2.css?v=30">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links@0.9.0/lib/xterm-addon-web-links.min.js"></script>
+    
+    <!-- AI Panel Styles -->
+    <style>
+    .ai-panel {
+        width: 450px;
+        min-width: 350px;
+        max-width: 600px;
+        background: linear-gradient(180deg, #0d0d1a, #0a0a12);
+        border-left: 2px solid #00ffff;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .ai-panel.collapsed {
+        width: 0;
+        min-width: 0;
+        border: none;
+        padding: 0;
+    }
+    .ai-header {
+        background: linear-gradient(180deg, #00ffff, #0088aa);
+        color: #000;
+        padding: 10px 15px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+    }
+    .ai-header .ai-model {
+        font-size: 10px;
+        background: rgba(0,0,0,0.3);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .ai-chat {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .ai-message {
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        max-width: 95%;
+    }
+    .ai-message.user {
+        background: #1a1a3a;
+        border: 1px solid #00ffff;
+        color: #00ffff;
+        align-self: flex-end;
+    }
+    .ai-message.assistant {
+        background: #0f1f0f;
+        border: 1px solid #00ff88;
+        color: #ddd;
+        align-self: flex-start;
+    }
+    .ai-message.system {
+        background: #2a2a0a;
+        border: 1px solid #ffaa00;
+        color: #ffaa00;
+        font-size: 11px;
+        text-align: center;
+    }
+    .ai-message pre {
+        background: #000;
+        padding: 8px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 11px;
+        margin: 8px 0;
+    }
+    .ai-message code {
+        background: rgba(0,255,255,0.1);
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+    .ai-input-area {
+        padding: 10px;
+        border-top: 1px solid #333;
+        display: flex;
+        gap: 8px;
+    }
+    #aiInput {
+        flex: 1;
+        background: #0d0d0d;
+        border: 1px solid #00ffff;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        resize: none;
+        font-family: "JetBrains Mono", monospace;
+    }
+    #aiInput:focus {
+        outline: none;
+        box-shadow: 0 0 10px rgba(0,255,255,0.3);
+    }
+    .ai-btn {
+        background: linear-gradient(180deg, #00aaaa, #008888);
+        border: 1px solid #00ffff;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 11px;
+    }
+    .ai-btn:hover {
+        box-shadow: 0 0 15px rgba(0,255,255,0.5);
+    }
+    .ai-actions {
+        display: flex;
+        gap: 5px;
+        padding: 5px 10px;
+        background: #111;
+        flex-wrap: wrap;
+    }
+    .ai-actions button {
+        padding: 4px 8px;
+        font-size: 10px;
+        background: #222;
+        border: 1px solid #444;
+        color: #aaa;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .ai-actions button:hover {
+        background: #333;
+        border-color: #00ffff;
+        color: #fff;
+    }
+    .ai-loading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #00ffff;
+        padding: 10px;
+        font-size: 11px;
+    }
+    .ai-loading .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #00ffff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas" class="matrix-bg"></canvas>
+    
+    <!-- Login Screen -->
+    <script>if(localStorage.getItem("c2_token")){document.write("<style>#login-screen{display:none}</style>");}</script>
+    <div id="login-screen" class="login-container">
+        <div class="login-terminal">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span class="terminal-title">CYBER SECURITY TERMINAL</span>
+            </div>
+            <div class="login-content">
+                <div class="cyber-logo">
+                    <div class="logo-icon">🔐</div>
+                    <div class="logo-text">
+                        <span class="logo-main">CYBERSEC</span>
+                        <span class="logo-sub">OPERATIONS CENTER</span>
+                    </div>
+                </div>
+                
+                <div id="key-auth" class="login-box">
+                    <div class="login-header">
+                        <span class="status-indicator pulse"></span>
+                        <span>ADMIN KEY ACCESS</span>
+                    </div>
+                    <form id="key-login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="private-key">🔐 PRIVATE KEY (PEM)</label>
+                            <div class="input-wrapper key-input">
+                                <span class="input-icon">🔑</span>
+                                <textarea id="private-key" rows="6" spellcheck="false" placeholder="-----BEGIN PRIVATE KEY-----&#10;Paste your RSA private key here...&#10;-----END PRIVATE KEY-----"></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="login-btn" id="key-login-btn">
+                            <span class="btn-text">AUTHENTICATE</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </form>
+                    <div id="key-login-error" class="error-output"></div>
+                </div>
+                
+                <div class="login-footer">
+                    <div class="footer-info">
+                        <span>🛡️ RSA Key Authentication</span>
+                    </div>
+                    <div class="credentials-hint">
+                        <code class="hint-code">openssl genrsa -out key.pem 2048</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main C2 Console -->
+    <div id="console" class="console-container" style="display: none;">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-left">
+                <span class="logo">🔐 CYBERSEC</span>
+                <span class="separator">|</span>
+                <span class="status-indicator online"></span>
+                <span class="status-text">CONNECTED</span>
+            </div>
+            <div class="top-center">
+                <div class="agent-status">
+                    <span class="agent-pill online" data-agent="cyber"><span class="dot"></span>AI AGENT</span>
+                </div>
+            </div>
+            <div class="top-right">
+                <span class="user-badge" id="user-badge">cyber</span>
+                <span class="timestamp" id="timestamp"></span>
+                <button id="logout-btn" class="btn-small">EXIT</button>
+            </div>
+        </div>
+
+        <!-- Main Layout - FULLSCREEN TERMINAL + AI PANEL -->
+        <div class="main-layout" style="padding:0;display:flex;">
+            <div class="center-panel" style="flex:1;min-width:0;height:100%;">
+                <div class="terminal-window" style="height:100%;">
+                    <div class="terminal-tabs">
+                        <div class="tab" data-tab="msf-pty" onclick="switchTab('msf-pty')">🎯 MSFCONSOLE</div>
+                        <div class="tab" data-tab="pty" onclick="switchTab('pty')">🖥️ SHELL</div>
+                        <div class="tab active" data-tab="bits" onclick="switchTab('bits')">📡 BITS C2</div>
+                        <div style="flex:1;"></div>
+                        <button onclick="toggleAIPanel()" style="background:linear-gradient(135deg,#00aaaa,#008888);border:1px solid #00ffff;color:#fff;padding:4px 12px;font-size:11px;cursor:pointer;border-radius:3px;margin-right:5px;">🤖 AI</button>
+                    </div>
+                    
+                    <!-- MSF PTY Terminal -->
+                    <div id="msf-pty-container" style="display:none;flex-direction:column;flex:1;height:calc(100% - 40px);background:#000;">
+                        <div class="msf-pty-toolbar" style="display:flex;gap:6px;padding:8px 12px;background:linear-gradient(180deg,#1a1a1a,#111);border-bottom:1px solid #333;flex-wrap:wrap;align-items:center;">
+                            <span style="color:#0f0;font-size:11px;font-weight:bold;margin-right:6px;">⚡ QUICK:</span>
+                            <select id="msf-listener-template" style="background:#222;color:#0f0;border:1px solid #444;padding:4px 8px;font-size:11px;border-radius:3px;cursor:pointer;">
+                                <option value="">🎯 Listener</option>
+                                <option value="https_443">HTTPS :443</option>
+                                <option value="https_8443">HTTPS :8443</option>
+                                <option value="tcp_4444">TCP :4444</option>
+                                <option value="tcp_9443">TCP :9443</option>
+                            </select>
+                            <select id="msf-payload-template" style="background:#222;color:#0f0;border:1px solid #444;padding:4px 8px;font-size:11px;border-radius:3px;cursor:pointer;">
+                                <option value="">📦 Payload</option>
+                                <option value="exe_https">msfvenom EXE</option>
+                                <option value="dll_https">msfvenom DLL</option>
+                                <option value="ps1_https">msfvenom PS1</option>
+                                <option value="raw_https">msfvenom RAW</option>
+                            </select>
+                            <select id="msf-post-template" style="background:#222;color:#0f0;border:1px solid #444;padding:4px 8px;font-size:11px;border-radius:3px;cursor:pointer;">
+                                <option value="">🔧 Post</option>
+                                <option value="getsystem">getsystem</option>
+                                <option value="hashdump">hashdump</option>
+                                <option value="migrate">migrate</option>
+                                <option value="shell">shell</option>
+                                <option value="ps">ps</option>
+                                <option value="sysinfo">sysinfo</option>
+                            </select>
+                            <div style="border-left:1px solid #444;height:20px;margin:0 6px;"></div>
+                            <button onclick="msfPtySendCommand('sessions -l')" style="background:#2a2a2a;color:#0f0;border:1px solid #444;padding:4px 12px;font-size:11px;cursor:pointer;border-radius:3px;">📋 Sessions</button>
+                            <button onclick="msfPtySendCommand('jobs -l')" style="background:#2a2a2a;color:#0f0;border:1px solid #444;padding:4px 12px;font-size:11px;cursor:pointer;border-radius:3px;">⚡ Jobs</button>
+                            <button onclick="msfPtySendCommand('sessions -K')" style="background:#3a1a1a;color:#f55;border:1px solid #644;padding:4px 12px;font-size:11px;cursor:pointer;border-radius:3px;">☠️ Kill All</button>
+                        </div>
+                        <div id="msf-pty-terminal" style="flex:1;height:100%;"></div>
+                    </div>
+                    
+                    <!-- PTY Terminal -->
+                    <div id="pty-terminal" style="display:none;flex:1;height:calc(100% - 40px);background:#000;"></div>
+                    
+                    <!-- BITS C2 Terminal -->
+                    <div id="bits-terminal" style="display:flex;flex:1;height:calc(100% - 40px);background:#1a0a0a;">
+                        <iframe id="bits-iframe" src="" style="width:100%;height:100%;border:none;background:#1a0a0a;"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Global AI Panel (Right Side) -->
+            <div id="globalAIPanel" class="ai-panel collapsed">
+                <div class="ai-header">
+                    <span>🤖 RED TEAM AI</span>
+                    <span class="ai-model" id="aiModelBadge">Ollama</span>
+                </div>
+                <div class="ai-actions">
+                    <button onclick="analyzeCurrentOutput()">📊 Analyze</button>
+                    <button onclick="aiQuickAction('privesc')">🔓 Privesc</button>
+                    <button onclick="aiQuickAction('persist')">📌 Persist</button>
+                    <button onclick="aiQuickAction('lateral')">🔀 Lateral</button>
+                    <button onclick="aiQuickAction('creds')">🔑 Creds</button>
+                    <button onclick="aiQuickAction('evasion')">🛡️ Evasion</button>
+                    <button onclick="clearAIChat()">🗑️ Clear</button>
+                </div>
+                <div class="ai-chat" id="aiChat">
+                    <div class="ai-message system">🤖 AI Red Team Assistant ready. I can analyze terminal output and help with exploitation.</div>
+                </div>
+                <div class="ai-input-area">
+                    <textarea id="aiInput" rows="2" placeholder="Ask the AI about your target..."></textarea>
+                    <button class="ai-btn" onclick="sendAIMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="status-item"><kbd>Tab</kbd> autocomplete</span>
+                <span class="status-item"><kbd>↑↓</kbd> history</span>
+                <span class="status-item">Type <kbd>help</kbd> for commands</span>
+            </div>
+            <div class="status-right">
+                <span class="status-item" id="ws-status">○ WS</span>
+                <span class="status-item" id="op-status">READY</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cyber Prompt Modal -->
+    <div id="cyber-prompt-modal" class="cyber-modal hidden">
+        <div class="cyber-modal-backdrop" onclick="closeCyberPrompt(null)"></div>
+        <div class="cyber-modal-container cyber-prompt-container">
+            <div class="cyber-modal-header">
+                <div class="modal-header-left">
+                    <span class="modal-icon">🎯</span>
+                    <span class="modal-title" id="prompt-title">ENTER TARGET</span>
+                </div>
+                <button class="modal-close" onclick="closeCyberPrompt(null)">×</button>
+            </div>
+            <div class="cyber-modal-body">
+                <div class="cyber-form-group">
+                    <input type="text" id="cyber-prompt-input" class="cyber-input" placeholder="Enter value..." autocomplete="off">
+                </div>
+            </div>
+            <div class="cyber-modal-footer">
+                <button class="cyber-btn cyber-btn-cancel" onclick="closeCyberPrompt(null)">CANCEL</button>
+                <button class="cyber-btn cyber-btn-primary" onclick="submitCyberPrompt()">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/c2.js?v=59"></script>
+    <script>
+        (function() {
+            const canvas = document.getElementById('matrix-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+            function draw() {
+                ctx.fillStyle = 'rgba(10, 14, 20, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + 'px JetBrains Mono';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    const x = i * fontSize;
+                    const y = drops[i] * fontSize;
+                    ctx.globalAlpha = Math.random() * 0.5 + 0.1;
+                    ctx.fillText(text, x, y);
+                    ctx.globalAlpha = 1;
+                    if (y > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            setInterval(draw, 50);
+        })();
+    </script>
+    <script src="/static/js/ai_chat.js?v=1"></script>
+    <script src="/static/js/c2_msf_pty.js?v=18"></script>
+</body>
+</html>

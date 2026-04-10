@@ -1,0 +1,5 @@
+# Fast MSF init - no delay
+spool /opt/cyber_c2/msf.log
+setg TimestampOutput false
+setg PromptTimeFormat ""
+setg ConsoleLogging false

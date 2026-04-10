@@ -1,0 +1,72 @@
+# Environment & Secrets
+.env
+.env.bak
+*.key
+certs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Logs
+*.log
+logs/
+
+# Compiled binaries & artifacts (anywhere in repo)
+*.exe
+*.dll
+*.so
+*.o
+*.obj
+*.pdb
+*.bin
+*.iso
+*.shellcode
+
+# Shellcode & encrypted payload dumps
+shellcode*.txt
+payloads/**/*shellcode*.txt
+payloads/**/*_encrypted.txt
+payloads/*_encrypted.txt
+
+# Rust build output
+target/
+
+# .NET build output
+obj/
+**/bin/Release/
+**/bin/Debug/
+output/
+
+# Compiled resources
+*.res
+
+# Third-party tools (add as git submodule if needed)
+payloads/PowerSploit/
+
+# Data & Runtime
+data/
+memory/
+
+# Backups
+*.bck
+*.bak
+*.bak[0-9]*
+*.bak.*
+*.backup
+*.old
+*.orig
+
+# Tunnel info
+tunnel_info.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

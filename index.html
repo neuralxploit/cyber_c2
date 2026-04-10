@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2A C2 Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/c2.css?v=29">
+    <!-- xterm.js for real PTY terminal -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links@0.9.0/lib/xterm-addon-web-links.min.js"></script>
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-canvas" class="matrix-bg"></canvas>
+    
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-terminal">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span class="terminal-title">CYBER SECURITY TERMINAL</span>
+            </div>
+            <div class="login-content">
+                <div class="cyber-logo">
+                    <div class="logo-icon">🔐</div>
+                    <div class="logo-text">
+                        <span class="logo-main">CYBERSEC</span>
+                        <span class="logo-sub">OPERATIONS CENTER</span>
+                    </div>
+                </div>
+                
+                <!-- RSA Key Auth -->
+                <div id="key-auth" class="login-box">
+                    <div class="login-header">
+                        <span class="status-indicator pulse"></span>
+                        <span>ADMIN KEY ACCESS</span>
+                    </div>
+                    <form id="key-login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="private-key">🔐 PRIVATE KEY (PEM)</label>
+                            <div class="input-wrapper key-input">
+                                <span class="input-icon">🔑</span>
+                                <textarea id="private-key" rows="6" spellcheck="false" placeholder="-----BEGIN PRIVATE KEY-----
+Paste your RSA private key here...
+-----END PRIVATE KEY-----"></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="login-btn" id="key-login-btn">
+                            <span class="btn-text">AUTHENTICATE</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </form>
+                    <div id="key-login-error" class="error-output"></div>
+                </div>
+                
+                <div class="login-footer">
+                    <div class="footer-info">
+                        <span>🛡️ RSA Key Authentication</span>
+                    </div>
+                    <div class="credentials-hint">
+                        <code class="hint-code">openssl genrsa -out key.pem 2048</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main C2 Console -->
+    <div id="console" class="console-container" style="display: none;">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-left">
+                <span class="logo">🔐 CYBERSEC</span>
+                <span class="separator">|</span>
+                <span class="status-indicator online"></span>
+                <span class="status-text">CONNECTED</span>
+            </div>
+            <div class="top-center">
+                <div class="agent-status">
+                    <span class="agent-pill online" data-agent="cyber"><span class="dot"></span>AI AGENT</span>
+                </div>
+            </div>
+            <div class="top-right">
+                <span class="user-badge" id="user-badge">admin</span>
+                <span class="timestamp" id="timestamp"></span>
+                <button id="logout-btn" class="btn-small">EXIT</button>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Left Panel - MSF Only -->
+            <!-- Left Panel - MSF Connect Only -->
+            <div class="left-panel" style="width: 140px; min-width: 140px;">
+                <div class="panel-section" style="padding: 8px;">
+                    <div class="section-header" style="font-size: 11px; margin-bottom: 6px;">
+                        <span>🎯 MSF</span>
+                    </div>
+                    <div class="msf-controls" style="gap: 4px;">
+                        <button class="op-btn msf-btn small" id="msf-start-btn" onclick="startMsf()">▶ ON</button>
+                        <button class="op-btn msf-btn danger small" id="msf-kill-btn" onclick="killMsf()">⏹ OFF</button>
+                    </div>
+                    <div class="msf-info" id="msf-info" style="margin-top: 6px;">
+                        <span id="msf-status" class="msf-status" style="font-size: 9px;">○ OFFLINE</span>
+                    </div>
+                </div>
+                <div class="panel-section" style="padding: 8px;">
+                    <button class="op-btn listener-btn small" onclick="showListenerModal()" style="width: 100%; font-size: 9px;">
+                        🎯 LISTENER
+                    </button>
+                </div>
+            </div>
+
+            <!-- Center - Main Terminal (BIGGER) -->
+            <div class="center-panel" style="flex: 1;">
+                <div class="terminal-window">
+                    <div class="terminal-tabs">
+                        <div class="tab active" data-tab="main">MSF CONSOLE</div>
+                        <div class="tab" data-tab="pty" onclick="switchTab('pty')">🖥️ PTY SHELL</div>
+                        <div class="tab" data-tab="bits" onclick="switchTab('bits')">📡 BITS C2</div>
+                    </div>
+                    <!-- Main Terminal -->
+                    <div class="terminal-body" id="terminal-output">
+                        <div class="output-line banner">
+═══════════════════════════════════════════════════════════════════════════════
+                        CYBERSEC OPERATIONS TERMINAL
+═══════════════════════════════════════════════════════════════════════════════</div>
+                        <div class="output-line system">[*] System initialized</div>
+                        <div class="output-line system">[*] WebSocket connection pending...</div>
+                        <div class="output-line help">[*] Type 'help' for available commands</div>
+                        <div class="output-line"></div>
+                    </div>
+                    <!-- PTY Terminal (xterm.js) -->
+                    <div id="pty-terminal" style="display:none;flex:1;height:100%;background:#000;"></div>
+                    
+                    <!-- BITS C2 Terminal -->
+                    <div id="bits-terminal" style="display:none;flex:1;background:#1a0a0a;">
+                        <iframe id="bits-iframe" src="" style="width:100%;height:100%;border:none;background:#1a0a0a;"></iframe>
+                    </div>
+                    
+                    <div class="terminal-input-area" id="main-input-area">
+                        <span class="input-prompt" id="prompt">msf&gt;</span>
+                        <input type="text" id="terminal-input" class="terminal-input" autocomplete="off" spellcheck="false" autofocus>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Sessions & Jobs -->
+            <div class="right-panel" style="width: 220px; min-width: 220px; display: flex;">
+                <div class="panel-section" style="flex: 1;">
+                    <div class="section-header">
+                        <span>🔗 SESSIONS</span>
+                        <button class="btn-icon" onclick="refreshSessionsUI()" title="Refresh">⟳</button>
+                    </div>
+                    <div class="session-list" id="session-list" style="min-height: 120px; max-height: 200px; overflow-y: auto;">
+                        <div class="session-item idle">No sessions</div>
+                    </div>
+                </div>
+                <div class="panel-section" style="flex: 1;">
+                    <div class="section-header">
+                        <span>⚡ JOBS</span>
+                        <button class="btn-icon" onclick="refreshJobsUI()" title="Refresh">⟳</button>
+                    </div>
+                    <div class="jobs-list" id="jobs-list" style="min-height: 120px; max-height: 200px; overflow-y: auto;">
+                        <div class="job-item idle">No jobs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="status-item"><kbd>Tab</kbd> autocomplete</span>
+                <span class="status-item"><kbd>↑↓</kbd> history</span>
+                <span class="status-item">Type <kbd>help</kbd> for commands</span>
+            </div>
+            <div class="status-right">
+                <span class="status-item" id="ws-status">○ WS</span>
+                <span class="status-item" id="op-status">READY</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cyber Modal for Listener Setup -->
+    <div id="cyber-modal" class="cyber-modal hidden">
+        <div class="cyber-modal-backdrop"></div>
+        <div class="cyber-modal-container">
+            <div class="cyber-modal-header">
+                <div class="modal-header-left">
+                    <span class="modal-icon">📡</span>
+                    <span class="modal-title" id="modal-title">CREATE LISTENER</span>
+                </div>
+                <button class="modal-close" onclick="closeCyberModal()">×</button>
+            </div>
+            <div class="cyber-modal-body" id="modal-body">
+                <!-- Dynamic content injected here -->
+            </div>
+            <div class="cyber-modal-footer" id="modal-footer">
+                <!-- Dynamic buttons injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cyber Prompt Modal (replaces ugly browser prompt) -->
+    <div id="cyber-prompt-modal" class="cyber-modal hidden">
+        <div class="cyber-modal-backdrop" onclick="closeCyberPrompt(null)"></div>
+        <div class="cyber-modal-container cyber-prompt-container">
+            <div class="cyber-modal-header">
+                <div class="modal-header-left">
+                    <span class="modal-icon">🎯</span>
+                    <span class="modal-title" id="prompt-title">ENTER TARGET</span>
+                </div>
+                <button class="modal-close" onclick="closeCyberPrompt(null)">×</button>
+            </div>
+            <div class="cyber-modal-body">
+                <div class="cyber-form-group">
+                    <input type="text" id="cyber-prompt-input" class="cyber-input" placeholder="Enter value..." autocomplete="off">
+                </div>
+            </div>
+            <div class="cyber-modal-footer">
+                <button class="cyber-btn cyber-btn-cancel" onclick="closeCyberPrompt(null)">CANCEL</button>
+                <button class="cyber-btn cyber-btn-primary" onclick="submitCyberPrompt()">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/c2.js?v=54"></script>
+    <script>
+        // Matrix Rain Effect
+        (function() {
+            const canvas = document.getElementById('matrix-canvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            
+            const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/\\{}[]|;:,.~`!@#$%^&*()_+-=';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(10, 14, 20, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + 'px JetBrains Mono';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    const x = i * fontSize;
+                    const y = drops[i] * fontSize;
+                    
+                    // Varying opacity for depth effect
+                    ctx.globalAlpha = Math.random() * 0.5 + 0.1;
+                    ctx.fillText(text, x, y);
+                    ctx.globalAlpha = 1;
+                    
+                    if (y > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 50);
+        })();
+    </script>
+</body>
+</html>
