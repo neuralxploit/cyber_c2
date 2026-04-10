@@ -2,6 +2,7 @@
 .env
 .env.bak
 *.key
+*.key.pub
 certs/
 
 # Python
@@ -25,24 +26,21 @@ logs/
 *.bin
 *.iso
 *.shellcode
+*.res
 
-# Shellcode & encrypted payload dumps
-shellcode*.txt
-payloads/**/*shellcode*.txt
-payloads/**/*_encrypted.txt
-payloads/*_encrypted.txt
+# Shellcode & encrypted payload text dumps
+**/shellcode*.txt
+**/*shellcode*.txt
+**/*encrypted*.txt
 
-# Rust build output
-target/
+# Rust build output (any depth)
+**/target/
 
-# .NET build output
-obj/
+# .NET build output (any depth)
+**/obj/
 **/bin/Release/
 **/bin/Debug/
-output/
-
-# Compiled resources
-*.res
+**/output/
 
 # Third-party tools (add as git submodule if needed)
 payloads/PowerSploit/

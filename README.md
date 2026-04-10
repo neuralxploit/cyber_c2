@@ -174,6 +174,29 @@ cyber_c2/
 
 ---
 
+## Authentication Setup
+
+The operator console uses **RSA key-based authentication** - no passwords. You sign a challenge with your private key, the server verifies it against your public key.
+
+```bash
+# Generate your keypair
+python generate_keys.py
+```
+
+This creates:
+- `admin.key` - Your private key (paste into the login page to authenticate)
+- `admin.key.pub` - Your public key (for reference)
+- Prints `ADMIN_PUBLIC_KEY=...` to add to your `.env`
+
+```bash
+# Add the public key to your .env
+echo "ADMIN_PUBLIC_KEY=<paste the base64 output>" >> .env
+```
+
+> **Never commit or share your `admin.key`** - it's excluded by `.gitignore`. Each operator should generate their own keypair.
+
+---
+
 ## AI Assistant Setup
 
 The AI assistant uses **Ollama** - runs entirely on your machine, no API keys or cloud services.
