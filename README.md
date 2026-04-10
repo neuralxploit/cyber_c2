@@ -96,10 +96,6 @@ chmod +x setup_ubuntu.sh
 # Install Python deps
 pip install -r requirements.txt
 
-# Configure
-cp .env.example .env
-# Edit .env with your settings (or let start_c5.sh auto-generate tokens)
-
 # Install an Ollama model for the AI assistant
 ollama pull llama3.1
 # Or any model you prefer: mistral, qwen2.5, codellama, etc.
@@ -112,18 +108,30 @@ chmod +x start_c5.sh
 ./start_c5.sh
 ```
 
-`start_c5.sh` handles the full startup sequence:
-1. Validates OPSEC layers (VPN, Tor detection)
-2. Generates fresh auth tokens (`PAYLOAD_TOKEN`, `AGENT_API_KEY`)
+On **first run**, `start_c5.sh` automatically:
+1. Creates `.env` from `.env.example`
+2. Generates `JWT_SECRET`
+3. Generates RSA admin keypair (`admin.key` + adds public key to `.env`)
+4. Generates fresh `PAYLOAD_TOKEN`, `AGENT_API_KEY`, `A2A_JWT_SECRET`
+
+No manual config needed - just run it and login.
+
+**Full startup sequence:**
+1. First-run setup (`.env`, keys, tokens)
+2. Validates OPSEC layers (VPN, Tor detection)
 3. Cross-compiles Rust agents for Windows (x86_64-pc-windows-gnu)
 4. Starts **dual Cloudflare tunnels** (C2 on `:8000`, MSF on `:8443`), optionally routed through Tor
 5. Injects tunnel URLs and tokens into all payload source files
-6. Launches the C2 server (FastAPI + Redis)
-7. Prints ready-to-use payload one-liners with the live tunnel URLs
+6. Compiles Nim and C# agents with fresh config
+7. Launches the C2 server (FastAPI + Redis)
+8. Prints ready-to-use payload one-liners with live tunnel URLs
 
 ```bash
 # Resume mode - reuse existing tunnel URLs (e.g. after a crash)
 ./start_c5.sh --resume
+
+# Route through Tor for extra anonymity
+./start_c5.sh --tor
 ```
 
 ---
@@ -183,21 +191,18 @@ cyber_c2/
 
 ## Authentication Setup
 
-The operator console uses **RSA key-based authentication** - no passwords. You sign a challenge with your private key, the server verifies it against your public key.
+The operator console uses **RSA key-based authentication** - no passwords. You paste your private key into the login page, the server verifies it against your public key.
 
+**Automatic (recommended):** `start_c5.sh` generates everything on first run - just login with:
 ```bash
-# Generate your keypair
-python generate_keys.py
+cat admin.key
+# Copy the output and paste into the login page
 ```
 
-This creates:
-- `admin.key` - Your private key (paste into the login page to authenticate)
-- `admin.key.pub` - Your public key (for reference)
-- Prints `ADMIN_PUBLIC_KEY=...` to add to your `.env`
-
+**Manual (if needed):**
 ```bash
-# Add the public key to your .env
-echo "ADMIN_PUBLIC_KEY=<paste the base64 output>" >> .env
+python generate_keys.py
+# Creates admin.key and prints ADMIN_PUBLIC_KEY to add to .env
 ```
 
 > **Never commit or share your `admin.key`** - it's excluded by `.gitignore`. Each operator should generate their own keypair.

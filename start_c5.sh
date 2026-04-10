@@ -109,6 +109,51 @@ echo -e "    ${GREEN}[4]${NC} Cloudflare Edge"
 echo -e "    ${GREEN}[5]${NC} Target"
 echo -e "${CYAN}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
+# [0b] First-run setup: create .env and generate keys if missing
+if [ ! -f "$C2_DIR/.env" ]; then
+    echo -e "${YELLOW}[0b] First run detected - creating .env from template...${NC}"
+    if [ -f "$C2_DIR/.env.example" ]; then
+        cp "$C2_DIR/.env.example" "$C2_DIR/.env"
+    else
+        touch "$C2_DIR/.env"
+    fi
+    # Generate JWT_SECRET
+    JWT_SECRET=$(openssl rand -hex 64)
+    echo "JWT_SECRET=$JWT_SECRET" >> "$C2_DIR/.env"
+    echo -e "${GREEN}  ✓ Created .env with fresh JWT_SECRET${NC}"
+fi
+
+# Generate admin keypair if missing
+if [ ! -f "$C2_DIR/admin.key" ]; then
+    echo -e "${YELLOW}[0c] Generating admin RSA keypair...${NC}"
+    if command -v python3 &>/dev/null && python3 -c "import cryptography" 2>/dev/null; then
+        cd "$C2_DIR" && python3 generate_keys.py
+        # Extract the public key and add to .env
+        PUB_KEY=$(python3 -c "
+from cryptography.hazmat.primitives import serialization
+import base64
+with open('admin.key.pub','rb') as f:
+    pub = serialization.load_pem_public_key(f.read())
+der = pub.public_bytes(serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
+print(base64.b64encode(der).decode())
+")
+        # Remove old key and add new one
+        sedi "/^ADMIN_PUBLIC_KEY=/d" "$C2_DIR/.env"
+        echo "ADMIN_PUBLIC_KEY=$PUB_KEY" >> "$C2_DIR/.env"
+        echo -e "${GREEN}  ✓ admin.key generated - paste contents into login page${NC}"
+        echo -e "${YELLOW}  ⚠ SAVE YOUR KEY: cat $C2_DIR/admin.key${NC}"
+    else
+        echo -e "${RED}  ✗ Cannot generate keys (need: pip install cryptography)${NC}"
+        echo -e "${YELLOW}  → Run manually: python3 generate_keys.py${NC}"
+    fi
+fi
+
+# Ensure JWT_SECRET exists in .env
+if ! grep -q "^JWT_SECRET=" "$C2_DIR/.env" 2>/dev/null; then
+    echo "JWT_SECRET=$(openssl rand -hex 64)" >> "$C2_DIR/.env"
+    echo -e "${GREEN}  ✓ Generated JWT_SECRET${NC}"
+fi
+
 # [1/8] GENERATE NEW TOKENS (skip in resume mode)
 if $RESUME_MODE; then
     echo -e "${YELLOW}[1/8] Resume mode - keeping existing tokens...${NC}"
