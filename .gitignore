@@ -57,6 +57,7 @@ memory/
 *.backup
 *.old
 *.orig
+*.302025
 
 # Tunnel info
 tunnel_info.txt
